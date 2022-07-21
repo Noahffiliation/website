@@ -9,7 +9,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def home():
-    return f'<h1>Soon<sup>TM</sup></h1>'
+    return render_template('dashboard.html')
 
 
 @app.route('/recently_watched')
@@ -23,13 +23,7 @@ def recently_watched():
     trakt_request = Request(
         'https://api.trakt.tv/users/noahffiliation/history/', headers=headers)
     response = urlopen(trakt_request).read()
-
-    # response = feedparser.parse('https://api.trakt.tv/users/noahffiliation/watchlist/movies/title', request_headers=headers)
-
-    # print(response)
-
     trakt_list = json.loads(response)
-    # print(trakt_list[0])
     return render_template('recently_watched.html', trakt_list=trakt_list)
 
 
