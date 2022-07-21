@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}Recent Letterboxd Reviews{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+  {% for entry in rss_feed.entries %}
+    <h3>{{ entry.title }}</h3>
+    <p class="body">{{ entry.summary }}</p>
+    {% if not loop.last %}
+        <hr>
+    {% endif %}
+  {% endfor %}
+{% endblock %}
