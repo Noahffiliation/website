@@ -33,11 +33,6 @@ def letterboxd():
     return render_template('letterboxd.html', rss_feed=rss_feed)
 
 
-@app.route('/multisearch')
-def multisearch():
-    return render_template('multisearch.html')
-
-
 @app.route('/lastfm')
 def lastfm():
     url = 'http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=noahffiliation&api_key=' + \
@@ -45,3 +40,18 @@ def lastfm():
     response = urlopen(url).read()
     lastfm_dict = json.loads(response)
     return render_template('lastfm.html', lastfm_dict=lastfm_dict)
+
+
+@app.route('/watchlist')
+def watchlist():
+    headers = {
+        'Content-Type': 'application/json',
+        'trakt-api-version': '2',
+        'trakt-api-key': os.environ.get('TRAKT_API_KEY')
+    }
+
+    watchlist_request = Request(
+        'https://api.trakt.tv/users/noahffiliation/watchlist/', headers=headers)
+    response = urlopen(watchlist_request).read()
+    watchlist = json.loads(response)
+    return render_template('watchlist.html', watchlist=watchlist)
