@@ -7,7 +7,7 @@
 {% block content %}
   {% for entry in trakt_list %}
     <h3>{{ entry["show"]["title"] }} ({{ entry["show"]["year"] }}) - Season {{ entry["episode"]["season"] }} Episode {{ entry["episode"]["number"] }}</h3>
-    <p>Watched at: {{ entry["watched_at"] }}</p>
+    <p>Watched at: {{ entry["watched_at"]|strftime }} UTC</p>
     {% if not loop.last %}
         <hr>
     {% endif %}

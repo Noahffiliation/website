@@ -3,6 +3,7 @@ from flask import Flask, render_template
 from urllib.request import Request, urlopen
 import feedparser
 import json
+import dateutil.parser
 
 app = Flask(__name__)
 
@@ -58,6 +59,7 @@ def tv_watchlist():
     watchlist.reverse()
     return render_template('tv_watchlist.html', watchlist=watchlist)
 
+
 @app.route('/movie_watchlist')
 def movie_watchlist():
     headers = {
@@ -73,3 +75,12 @@ def movie_watchlist():
     # Default order for 'released' is newest first
     watchlist.reverse()
     return render_template('movie_watchlist.html', watchlist=watchlist)
+
+
+@app.template_filter('strftime')
+def _filter_datetime(date, fmt=None):
+    date = dateutil.parser.parse(date)
+    native = date.replace(tzinfo=None)
+    if not fmt:
+        fmt='%B %d %Y %H:%M:%S'
+    return native.strftime(fmt)
