@@ -42,8 +42,8 @@ def lastfm():
     return render_template('lastfm.html', lastfm_dict=lastfm_dict)
 
 
-@app.route('/watchlist')
-def watchlist():
+@app.route('/tv_watchlist')
+def tv_watchlist():
     headers = {
         'Content-Type': 'application/json',
         'trakt-api-version': '2',
@@ -56,4 +56,20 @@ def watchlist():
     watchlist = json.loads(response)
     # Default order for 'released' is newest first
     watchlist.reverse()
-    return render_template('watchlist.html', watchlist=watchlist)
+    return render_template('tv_watchlist.html', watchlist=watchlist)
+
+@app.route('/movie_watchlist')
+def movie_watchlist():
+    headers = {
+        'Content-Type': 'application/json',
+        'trakt-api-version': '2',
+        'trakt-api-key': os.environ.get('TRAKT_API_KEY')
+    }
+
+    watchlist_request = Request(
+        'https://api.trakt.tv/users/noahffiliation/watchlist/movies/released', headers=headers)
+    response = urlopen(watchlist_request).read()
+    watchlist = json.loads(response)
+    # Default order for 'released' is newest first
+    watchlist.reverse()
+    return render_template('movie_watchlist.html', watchlist=watchlist)
