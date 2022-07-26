@@ -51,7 +51,9 @@ def watchlist():
     }
 
     watchlist_request = Request(
-        'https://api.trakt.tv/users/noahffiliation/watchlist/', headers=headers)
+        'https://api.trakt.tv/users/noahffiliation/watchlist/shows/released', headers=headers)
     response = urlopen(watchlist_request).read()
     watchlist = json.loads(response)
+    # Default order for 'released' is newest first
+    watchlist.reverse()
     return render_template('watchlist.html', watchlist=watchlist)
