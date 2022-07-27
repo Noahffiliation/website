@@ -4,6 +4,7 @@ from urllib.request import Request, urlopen
 import feedparser
 import json
 import dateutil.parser
+import requests
 
 app = Flask(__name__)
 
@@ -77,10 +78,26 @@ def movie_watchlist():
     return render_template('movie_watchlist.html', watchlist=watchlist)
 
 
+@app.route('/games')
+def games():
+    headers = {
+        "Accept": "application/json",
+        "Notion-Version": "2022-06-28",
+        "Authorization": "Bearer " + os.environ.get('NOTION_KEY')
+    }
+
+    url = "https://api.notion.com/v1/databases/" + \
+        os.environ.get('NOTION_DATABASE_ID')
+    response = requests.get(url, headers=headers)
+    gamelist = json.loads(response.text)
+    print(gamelist)
+    return render_template('games.html', gamelist=gamelist)
+
+
 @app.template_filter('strftime')
 def _filter_datetime(date, fmt=None):
     date = dateutil.parser.parse(date)
     native = date.replace(tzinfo=None)
     if not fmt:
-        fmt='%B %d %Y %H:%M:%S'
+        fmt = '%B %d %Y %H:%M:%S'
     return native.strftime(fmt)
