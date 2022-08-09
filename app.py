@@ -94,6 +94,11 @@ def games():
     return render_template('games.html', gamelist=gamelist)
 
 
+@app.route('/live')
+def live():
+    return render_template('live.html')
+
+
 @app.template_filter('strftime')
 def _filter_datetime(date, fmt=None):
     date = dateutil.parser.parse(date)
