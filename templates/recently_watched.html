@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block header %}
-  <h1>{% block title %}Recently Watched{% endblock %}</h1>
+  <h1>{% block title %}Recently Watched TV Episodes{% endblock %}</h1>
 {% endblock %}
 
 {% block content %}
@@ -9,7 +9,7 @@
     <h3>{{ entry["show"]["title"] }} ({{ entry["show"]["year"] }}) - Season {{ entry["episode"]["season"] }} Episode {{ entry["episode"]["number"] }}</h3>
     <p>Watched at: {{ entry["watched_at"]|strftime }} UTC</p>
     {% if not loop.last %}
-        <hr>
+      <hr>
     {% endif %}
   {% endfor %}
 {% endblock %}

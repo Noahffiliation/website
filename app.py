@@ -23,7 +23,7 @@ def recently_watched():
     }
 
     trakt_request = Request(
-        'https://api.trakt.tv/users/noahffiliation/history/', headers=headers)
+        'https://api.trakt.tv/users/noahffiliation/history/shows', headers=headers)
     response = urlopen(trakt_request).read()
     trakt_list = json.loads(response)
     return render_template('recently_watched.html', trakt_list=trakt_list)
