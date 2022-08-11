@@ -83,15 +83,28 @@ def games():
     headers = {
         "Accept": "application/json",
         "Notion-Version": "2022-06-28",
-        "Authorization": "Bearer " + os.environ.get('NOTION_KEY')
+        "Authorization": "Bearer " + os.environ.get('NOTION_KEY'),
+        "Content-Type": "application/json"
     }
 
     url = "https://api.notion.com/v1/databases/" + \
-        os.environ.get('NOTION_DATABASE_ID')
-    response = requests.get(url, headers=headers)
+        os.environ.get('NOTION_DATABASE_ID') + "/query"
+    payload = {"page_size": 100, "filter": {"property": "Priority", "multi_select": {
+        "contains": "Current"}}, "sorts": [{"property": "Name", "direction": "ascending"}]}
+    response = requests.post(url, json=payload, headers=headers)
     gamelist = json.loads(response.text)
-    print(gamelist)
-    return render_template('games.html', gamelist=gamelist)
+    blocklist = []
+    for block in gamelist["results"]:
+        blockHeaders = {
+            "Accept": "application/json",
+            "Notion-Version": "2022-06-28",
+            "Authorization": "Bearer " + os.environ.get('NOTION_KEY')
+        }
+        blockUrl = "https://api.notion.com/v1/blocks/" + block["id"]
+        blockResponse = requests.get(blockUrl, headers=blockHeaders)
+        responseObject = json.loads(blockResponse.text)
+        blocklist.append(responseObject)
+    return render_template('games.html', blocklist=blocklist)
 
 
 @app.route('/live')
