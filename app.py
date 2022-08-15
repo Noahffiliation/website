@@ -86,15 +86,14 @@ def games():
         "Authorization": "Bearer " + os.environ.get('NOTION_KEY'),
         "Content-Type": "application/json"
     }
-
     url = "https://api.notion.com/v1/databases/" + \
         os.environ.get('NOTION_DATABASE_ID') + "/query"
     payload = {"page_size": 100, "filter": {"property": "Priority", "multi_select": {
         "contains": "Current"}}, "sorts": [{"property": "Name", "direction": "ascending"}]}
     response = requests.post(url, json=payload, headers=headers)
-    gamelist = json.loads(response.text)
+    db_object = json.loads(response.text)
     blocklist = []
-    for block in gamelist["results"]:
+    for block in db_object["results"]:
         blockHeaders = {
             "Accept": "application/json",
             "Notion-Version": "2022-06-28",

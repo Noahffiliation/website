@@ -8,7 +8,7 @@
   {% for track in lastfm_dict["recenttracks"]["track"] %}
     <h3>{{ track["artist"]["#text"] }} - {{ track["name"] }}</h3>
     {% if not loop.last %}
-        <hr>
+      <hr>
     {% endif %}
   {% endfor %}
 {% endblock %}
