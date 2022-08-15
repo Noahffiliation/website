@@ -88,7 +88,7 @@ def games():
     }
     url = "https://api.notion.com/v1/databases/" + \
         os.environ.get('NOTION_DATABASE_ID') + "/query"
-    payload = {"page_size": 100, "filter": {"property": "Priority", "multi_select": {
+    payload = {"page_size": 30, "filter": {"property": "Priority", "multi_select": {
         "contains": "Current"}}, "sorts": [{"property": "Name", "direction": "ascending"}]}
     response = requests.post(url, json=payload, headers=headers)
     db_object = json.loads(response.text)
