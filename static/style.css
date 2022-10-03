@@ -1,5 +1,21 @@
 html {
-    font-family: sans-serif; background: #eee; padding: 1rem;
+    font-family: sans-serif;
+    background: #eee;
+    max-width: 150ch;
+    padding: 3em 1em;
+    margin: auto;
+    line-height: 1.75;
+    font-size: 1.25em;
+}
+
+h1,h2,h3,h4,h5,h6 {
+    margin: 3em 0 1em;
+}
+
+p,ul,ol {
+    margin-bottom: 2em;
+    color: #1d1d1d;
+    font-family: sans-serif;
 }
 
 a {
@@ -7,15 +23,20 @@ a {
 }
 
 nav h1 a {
-    text-decoration: none; padding: 0.25rem 0.5rem;
+    text-decoration: none;
+    padding: 0.25rem 0.5rem;
 }
 
 nav ul  {
-    display: flex; list-style: none; margin: 0; padding: 0;
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
 }
 
 nav ul li a, nav ul li span, header .action {
-    display: block; padding: 0.5rem;
+    display: block;
+    padding: 0.5rem;
 }
 
 .content {
@@ -23,9 +44,12 @@ nav ul li a, nav ul li span, header .action {
 }
 
 .content > header {
-    border-bottom: 1px solid lightgray; display: flex; align-items: flex-end;
+    border-bottom: 1px solid lightgray;
+    display: flex;
+    align-items: flex-end;
 }
 
 .content > header h1 {
-    flex: auto; margin: 1rem 0 0.25rem 0;
+    flex: auto;
+    margin: 1rem 0 0.25rem 0;
 }

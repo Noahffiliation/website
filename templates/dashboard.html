@@ -5,5 +5,25 @@
 {% endblock %}
 
 {% block content %}
-    <h1>Soon<sup>TM</sup></h1>
+    <!-- <h1>Soon<sup>TM</sup></h1> -->
+    Movies Watched: {{ trakt_stats['movies']['watched'] }}
+    <br>
+    Shows Watched: {{ trakt_stats['shows']['watched'] }}
+    <br>
+    Anime Watched: {{ mal_lengths['completed'] }}
+    <br>
+    <br>
+    Movie Watchlist: {{ movies_shows_lengths['movies'] }}
+    <br>
+    Shows Watchlist: {{ movies_shows_lengths['shows'] }}
+    <br>
+    Anime Watchlist: {{ mal_lengths['plan_to_watch'] }}
+    <br>
+    <br>
+    Movie Progress: {{ (trakt_stats['movies']['watched'] / (movies_shows_lengths['movies'] + trakt_stats['movies']['watched']) * 100) | round | int }}%
+    <br>
+    Shows Progress: {{ (trakt_stats['shows']['watched'] / (movies_shows_lengths['shows'] + trakt_stats['shows']['watched']) * 100) | round | int }}%
+    <br>
+    Anime Progress: {{ (mal_lengths['completed'] / (mal_lengths['plan_to_watch'] + mal_lengths['completed']) * 100) | round | int }}%
+
 {% endblock %}

@@ -11,7 +11,53 @@ app = Flask(__name__)
 
 @app.route('/')
 def home():
-    return render_template('dashboard.html')
+    headers = {
+        'Content-Type': 'application/json',
+        'trakt-api-version': '2',
+        'trakt-api-key': os.environ.get('TRAKT_API_KEY')
+    }
+
+    trakt_request = Request(
+        'https://api.trakt.tv/users/noahffiliation/stats', headers=headers)
+    response = urlopen(trakt_request).read()
+    trakt_stats = json.loads(response)
+    movies_shows_lengths = get_user_lists()
+    mal_lengths = get_mal_data()
+    return render_template('dashboard.html', trakt_stats=trakt_stats, movies_shows_lengths=movies_shows_lengths, mal_lengths=mal_lengths)
+
+
+def get_user_lists():
+    headers = {
+        'Content-Type': 'application/json',
+        'trakt-api-version': '2',
+        'trakt-api-key': os.environ.get('TRAKT_API_KEY')
+    }
+
+    trakt_movies_request = Request(
+        'https://api.trakt.tv/users/noahffiliation/watchlist/movies', headers=headers)
+    trakt_shows_request = Request(
+        'https://api.trakt.tv/users/noahffiliation/watchlist/shows', headers=headers)
+    response_movies = urlopen(trakt_movies_request).read()
+    response_shows = urlopen(trakt_shows_request).read()
+    movies = json.loads(response_movies)
+    shows = json.loads(response_shows)
+    return {'movies': len(movies), 'shows': len(shows)}
+
+
+def get_mal_data():
+    headers = {
+        'X-MAL-CLIENT-ID': os.environ.get('MAL_CLIENT_ID')
+    }
+
+    mal_completed_request = Request(
+        'https://api.myanimelist.net/v2/users/noahffiliation/animelist?limit=400&status=completed', headers=headers)
+    mal_plan_to_watch_request = Request(
+        'https://api.myanimelist.net/v2/users/noahffiliation/animelist?limit=400&status=plan_to_watch', headers=headers)
+    response_completed = urlopen(mal_completed_request).read()
+    response_plan_to_watch = urlopen(mal_plan_to_watch_request).read()
+    anime_completed = json.loads(response_completed)
+    anime_plan_to_watch = json.loads(response_plan_to_watch)
+    return {'completed': len(anime_completed['data']), 'plan_to_watch': len(anime_plan_to_watch['data'])}
 
 
 @app.route('/recently_watched')
