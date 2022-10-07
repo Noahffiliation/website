@@ -90,25 +90,21 @@ def movie_watchlist():
     watchlist.reverse()
     return render_template('movie_watchlist.html', watchlist=watchlist)
 
-
-@cache
+# Caching because it usually takes ~7 seconds for this page to load
 @app.route('/games')
+@cache
 def games():
     url = "https://api.notion.com/v1/databases/" + \
         os.environ.get('NOTION_DATABASE_ID') + "/query"
+    # I really want to sort by my custom order, but that's not supported
     payload = {"page_size": 30, "filter": {"property": "Priority", "multi_select": {
         "contains": "Current"}}, "sorts": [{"property": "Name", "direction": "ascending"}]}
     response = requests.post(url, json=payload, headers=notion_headers)
     db_object = json.loads(response.text)
     blocklist = []
     for block in db_object["results"]:
-        blockHeaders = {
-            "Accept": "application/json",
-            "Notion-Version": "2022-06-28",
-            "Authorization": "Bearer " + os.environ.get('NOTION_KEY')
-        }
         blockUrl = "https://api.notion.com/v1/blocks/" + block["id"]
-        blockResponse = requests.get(blockUrl, headers=blockHeaders)
+        blockResponse = requests.get(blockUrl, headers=notion_headers)
         responseObject = json.loads(blockResponse.text)
         blocklist.append(responseObject)
     return render_template('games.html', blocklist=blocklist)
