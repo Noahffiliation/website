@@ -5,15 +5,14 @@
 {% endblock %}
 
 {% block content %}
+  <ul>
   {% for item in range(watchlist|length) %}
     {% for i in range(watchlist[item]["movie"]|length - 2) %}
       {% if watchlist[item]["movie"]["year"] != None %}
         <!-- Only works inside the inner for loop, so it's a loop that runs once -->
-        <h3>{{ watchlist[item]["movie"]["title"] }} - {{ watchlist[item]["movie"]["year"] }}</h3>
+        <li>{{ watchlist[item]["movie"]["title"] }} - {{ watchlist[item]["movie"]["year"] }}</li>
       {% endif %}
     {% endfor %}
-    {% if not loop.last and watchlist[item]["movie"]["year"] != None %}
-      <hr>
-    {% endif %}
   {% endfor %}
+</ul>
 {% endblock %}

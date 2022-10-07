@@ -5,7 +5,9 @@
 {% endblock %}
 
 {% block content %}
+  <ul>
     {% for game in blocklist %}
-      <h3>{{ game["child_page"]["title"] }}</h3>
+      <li>{{ game["child_page"]["title"] }}</li>
     {% endfor %}
+  </ul>
 {% endblock %}
