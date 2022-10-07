@@ -1,3 +1,4 @@
+from functools import cache
 import os
 from flask import Flask, render_template
 from urllib.request import Request, urlopen
@@ -8,22 +9,46 @@ import requests
 
 app = Flask(__name__)
 
+trakt_headers = {
+    'Content-Type': 'application/json',
+    'trakt-api-version': '2',
+    'trakt-api-key': os.environ.get('TRAKT_API_KEY')
+}
+
+mal_headers = {
+    'X-MAL-CLIENT-ID': os.environ.get('MAL_CLIENT_ID')
+}
+
+notion_headers = {
+    "Accept": "application/json",
+    "Notion-Version": "2022-06-28",
+    "Authorization": "Bearer " + os.environ.get('NOTION_KEY'),
+    "Content-Type": "application/json"
+}
+
+# Routes
+
 
 @app.route('/')
 def home():
     return render_template('dashboard.html')
 
 
+@app.route('/stats')
+def stats():
+    trakt_request = Request(
+        'https://api.trakt.tv/users/noahffiliation/stats', headers=trakt_headers)
+    response = urlopen(trakt_request).read()
+    trakt_stats = json.loads(response)
+    movies_shows_lengths = get_user_lists()
+    mal_lengths = get_mal_data()
+    return render_template('stats.html', trakt_stats=trakt_stats, movies_shows_lengths=movies_shows_lengths, mal_lengths=mal_lengths)
+
+
 @app.route('/recently_watched')
 def recently_watched():
-    headers = {
-        'Content-Type': 'application/json',
-        'trakt-api-version': '2',
-        'trakt-api-key': os.environ.get('TRAKT_API_KEY')
-    }
-
     trakt_request = Request(
-        'https://api.trakt.tv/users/noahffiliation/history/shows', headers=headers)
+        'https://api.trakt.tv/users/noahffiliation/history/shows', headers=trakt_headers)
     response = urlopen(trakt_request).read()
     trakt_list = json.loads(response)
     return render_template('recently_watched.html', trakt_list=trakt_list)
@@ -46,14 +71,8 @@ def lastfm():
 
 @app.route('/tv_watchlist')
 def tv_watchlist():
-    headers = {
-        'Content-Type': 'application/json',
-        'trakt-api-version': '2',
-        'trakt-api-key': os.environ.get('TRAKT_API_KEY')
-    }
-
     watchlist_request = Request(
-        'https://api.trakt.tv/users/noahffiliation/watchlist/shows/released', headers=headers)
+        'https://api.trakt.tv/users/noahffiliation/watchlist/shows/released', headers=trakt_headers)
     response = urlopen(watchlist_request).read()
     watchlist = json.loads(response)
     # Default order for 'released' is newest first
@@ -63,14 +82,8 @@ def tv_watchlist():
 
 @app.route('/movie_watchlist')
 def movie_watchlist():
-    headers = {
-        'Content-Type': 'application/json',
-        'trakt-api-version': '2',
-        'trakt-api-key': os.environ.get('TRAKT_API_KEY')
-    }
-
     watchlist_request = Request(
-        'https://api.trakt.tv/users/noahffiliation/watchlist/movies/released', headers=headers)
+        'https://api.trakt.tv/users/noahffiliation/watchlist/movies/released', headers=trakt_headers)
     response = urlopen(watchlist_request).read()
     watchlist = json.loads(response)
     # Default order for 'released' is newest first
@@ -78,19 +91,14 @@ def movie_watchlist():
     return render_template('movie_watchlist.html', watchlist=watchlist)
 
 
+@cache
 @app.route('/games')
 def games():
-    headers = {
-        "Accept": "application/json",
-        "Notion-Version": "2022-06-28",
-        "Authorization": "Bearer " + os.environ.get('NOTION_KEY'),
-        "Content-Type": "application/json"
-    }
     url = "https://api.notion.com/v1/databases/" + \
         os.environ.get('NOTION_DATABASE_ID') + "/query"
     payload = {"page_size": 30, "filter": {"property": "Priority", "multi_select": {
         "contains": "Current"}}, "sorts": [{"property": "Name", "direction": "ascending"}]}
-    response = requests.post(url, json=payload, headers=headers)
+    response = requests.post(url, json=payload, headers=notion_headers)
     db_object = json.loads(response.text)
     blocklist = []
     for block in db_object["results"]:
@@ -110,6 +118,8 @@ def games():
 def live():
     return render_template('live.html')
 
+# Filters
+
 
 @app.template_filter('strftime')
 def _filter_datetime(date, fmt=None):
@@ -118,3 +128,29 @@ def _filter_datetime(date, fmt=None):
     if not fmt:
         fmt = '%B %d %Y %H:%M:%S'
     return native.strftime(fmt)
+
+# Helpers
+
+
+def get_user_lists():
+    trakt_movies_request = Request(
+        'https://api.trakt.tv/users/noahffiliation/watchlist/movies', headers=trakt_headers)
+    trakt_shows_request = Request(
+        'https://api.trakt.tv/users/noahffiliation/watchlist/shows', headers=trakt_headers)
+    response_movies = urlopen(trakt_movies_request).read()
+    response_shows = urlopen(trakt_shows_request).read()
+    movies = json.loads(response_movies)
+    shows = json.loads(response_shows)
+    return {'movies': len(movies), 'shows': len(shows)}
+
+
+def get_mal_data():
+    mal_completed_request = Request(
+        'https://api.myanimelist.net/v2/users/noahffiliation/animelist?limit=400&status=completed', headers=mal_headers)
+    mal_plan_to_watch_request = Request(
+        'https://api.myanimelist.net/v2/users/noahffiliation/animelist?limit=400&status=plan_to_watch', headers=mal_headers)
+    response_completed = urlopen(mal_completed_request).read()
+    response_plan_to_watch = urlopen(mal_plan_to_watch_request).read()
+    anime_completed = json.loads(response_completed)
+    anime_plan_to_watch = json.loads(response_plan_to_watch)
+    return {'completed': len(anime_completed['data']), 'plan_to_watch': len(anime_plan_to_watch['data'])}
