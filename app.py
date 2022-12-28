@@ -90,7 +90,7 @@ def movie_watchlist():
     watchlist.reverse()
     return render_template('movie_watchlist.html', watchlist=watchlist)
 
-# Caching because it usually takes ~7 seconds for this page to load
+
 @app.route('/games')
 @cache
 def games():
