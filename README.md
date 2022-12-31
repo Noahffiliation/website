@@ -22,8 +22,7 @@ Potential features:
 - ???
 
 ## Built Using <a name = "built_using"></a>
-- [Flask](https://flask.palletsprojects.com/en/2.1.x/)
-- [Heroku](https://www.heroku.com/home)
+- ???
 
 ## Authors <a name = "authors"></a>
 - [@Noahffiliation](https://github.com/Noahffiliation) - Idea & Initial work
