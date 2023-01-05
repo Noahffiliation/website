@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 require('dotenv').config();
 var request = require('request');
+var LastFmNode = require('lastfm').LastFmNode;
 
 const game_controller = require('../controllers/gameController');
 const movie_controller = require('../controllers/movieController');
@@ -16,7 +17,6 @@ router.get('/', function(req, res, next) {
 /// STATS ROUTE ///
 
 router.get('/stats', function(req, res, next) {
-  // TODO Get Trakt stats and lengths
   request({
     method: 'GET',
     url: 'https://api.trakt.tv/users/noahffiliation/stats',
@@ -25,10 +25,10 @@ router.get('/stats', function(req, res, next) {
       'trakt-api-version': '2',
       'trakt-api-key': process.env.TRAKT_API_KEY
     }}, function (error, response, body) {
-      // console.log('Status:', response.statusCode);
-      // console.log('Headers:', JSON.stringify(response.headers));
-      console.log('Response:', JSON.parse(body));
-      res.render('stats', { title: 'Stats',  trakt_stats: JSON.parse(body) });
+      body = JSON.parse(body);
+      let movies_watched = body.movies.watched;
+      console.log(movies_watched);
+      res.render('stats', { title: 'Stats' });
   });
 });
 
@@ -96,8 +96,17 @@ router.get('/tv/:id', tv_controller.tv_detail);
 /// LASTFM ROUTE ///
 
 router.get('/lastfm', function(req, res, next) {
-  // TODO Get last.fm recent tracks
-  res.render('lastfm', { title: 'Last.fm' });
+  var lastfm = new LastFmNode({
+    api_key: process.env.LASTFM_API_KEY
+  });
+  lastfm.request("user.getRecentTracks", {
+    user: "noahffiliation",
+    handlers: {
+      success: function(data) {
+        res.render('lastfm', { title: 'Last.fm', data: data });
+      }
+    }
+  });
 });
 
 module.exports = router;
