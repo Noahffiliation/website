@@ -52,7 +52,7 @@ router.get('/game/:id', game_controller.game_detail);
 
 /// LETTERBOXD ROUTE ///
 
-router.get('/stats', function(req, res, next) {
+router.get('/letterboxd', function(req, res, next) {
   // TODO Get RSS Feed
   res.render('letterboxd', { title: 'Letterboxd' });
 });
