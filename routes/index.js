@@ -3,6 +3,8 @@ var router = express.Router();
 require('dotenv').config();
 var request = require('request');
 var LastFmNode = require('lastfm').LastFmNode;
+let Parser = require('rss-parser');
+let parser = new Parser();
 
 const game_controller = require('../controllers/gameController');
 const movie_controller = require('../controllers/movieController');
@@ -104,8 +106,10 @@ router.get('/game/:id', game_controller.game_detail);
 /// LETTERBOXD ROUTE ///
 
 router.get('/letterboxd', function(req, res, next) {
-  // TODO Get RSS Feed
-  res.render('letterboxd', { title: 'Letterboxd' });
+  (async () => {
+    let feed = await parser.parseURL('https://letterboxd.com/noahffiliation/rss/');
+    res.render('letterboxd', { title: 'Letterboxd', items: feed.items });
+  })();
 });
 
 /// MOVIE ROUTES ///
