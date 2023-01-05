@@ -26,9 +26,60 @@ router.get('/stats', function(req, res, next) {
       'trakt-api-key': process.env.TRAKT_API_KEY
     }}, function (error, response, body) {
       body = JSON.parse(body);
-      let movies_watched = body.movies.watched;
-      console.log(movies_watched);
-      res.render('stats', { title: 'Stats' });
+      var movies_watched = body.movies.watched;
+      var shows_watched = body.shows.watched;
+      request({
+        method: 'GET',
+        url: 'https://api.trakt.tv/users/noahffiliation/watchlist/movies',
+        headers: {
+          'Content-Type': 'application/json',
+          'trakt-api-version': '2',
+          'trakt-api-key': process.env.TRAKT_API_KEY
+        }}, function (error, response, body) {
+          body = JSON.parse(body);
+          var movies_length = body.length;
+          request({
+            method: 'GET',
+            url: 'https://api.trakt.tv/users/noahffiliation/watchlist/shows',
+            headers: {
+              'Content-Type': 'application/json',
+              'trakt-api-version': '2',
+              'trakt-api-key': process.env.TRAKT_API_KEY
+            }}, function (error, response, body) {
+              body = JSON.parse(body);
+              var shows_length = body.length;
+              request({
+                method: 'GET',
+                url: 'https://api.myanimelist.net/v2/users/noahffiliation/animelist?limit=400&status=completed',
+                headers: {
+                  'X-MAL-CLIENT-ID': process.env.MAL_CLIENT_ID
+                }
+              }, function (error, response, body) {
+                body = JSON.parse(body);
+                var anime_completed = body.data.length
+                request({
+                  method: 'GET',
+                  url: 'https://api.myanimelist.net/v2/users/noahffiliation/animelist?limit=400&status=plan_to_watch',
+                  headers: {
+                    'X-MAL-CLIENT-ID': process.env.MAL_CLIENT_ID
+                  }
+                }, function (error, response, body) {
+                  body = JSON.parse(body);
+                  var anime_length = body.data.length
+                  console.log(anime_length)
+                  let stats = {
+                    "movies_watched": movies_watched,
+                    "shows_watched": shows_watched,
+                    "anime_completed": anime_completed,
+                    "movies_total": movies_watched + movies_length,
+                    "shows_total": shows_watched + shows_length,
+                    "anime_total": anime_completed + anime_length
+                  }
+                  res.render('stats', { title: 'Stats', stats: stats });
+                });
+              });
+          });
+      });
   });
 });
 
