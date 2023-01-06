@@ -6,4 +6,4 @@ block content
   ul
     each item in items
         li
-            p #{item.title} : #{item.link}
+            p #{item.title} : #[a(href=item.link) !{item.link}]
