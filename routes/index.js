@@ -70,7 +70,7 @@ router.get('/stats', function(req, res) {
 					}, function(error, response, body) {
 						body = JSON.parse(body);
 						const anime_length = body.data.length;
-						console.log(anime_length);
+						// console.log(anime_length);
 						const stats = {
 							'movies_watched': movies_watched,
 							'shows_watched': shows_watched,
@@ -162,7 +162,7 @@ router.get('/recently_watched', function(req, res) {
 			'trakt-api-key': process.env.TRAKT_API_KEY,
 		} }, function(error, response, body) {
 		body = JSON.parse(body);
-		console.log(body[0].show.title, body[0].show.year, body[0].episode.season, body[0].episode.number);
+		// console.log(body[0].watched_at);
 		res.render('recently_watched', { title: 'Recently Watched', history: body });
 	});
 });
