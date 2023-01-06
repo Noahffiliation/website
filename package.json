@@ -6,7 +6,8 @@
   },
   "private": true,
   "scripts": {
-    "start": "nodemon ./bin/www"
+    "start": "npm run lint && nodemon ./bin/www",
+    "lint": "eslint **/*.js --fix"
   },
   "dependencies": {
     "@notionhq/client": "^2.2.3",
@@ -22,5 +23,8 @@
     "pug": "^3.0.2",
     "request": "^2.88.2",
     "rss-parser": "^3.12.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.31.0"
   }
 }
