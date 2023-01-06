@@ -103,15 +103,6 @@ router.get('/game/:id', game_controller.game_detail);
 
 // router.post('/game/:id/delete', game_controller.game_delete_post);
 
-/// LETTERBOXD ROUTE ///
-
-router.get('/letterboxd', function(req, res, next) {
-  (async () => {
-    let feed = await parser.parseURL('https://letterboxd.com/noahffiliation/rss/');
-    res.render('letterboxd', { title: 'Letterboxd', items: feed.items });
-  })();
-});
-
 /// MOVIE ROUTES ///
 
 // router.get('/movie/create', movie_controller.movie_create_get);
@@ -130,6 +121,15 @@ router.get('/movie/:id', movie_controller.movie_detail);
 
 // router.post('/movie/:id/delete', movie_controller.movie_delete_post);
 
+/// LETTERBOXD ROUTE ///
+
+router.get('/letterboxd', function(req, res, next) {
+  (async () => {
+    let feed = await parser.parseURL('https://letterboxd.com/noahffiliation/rss/');
+    res.render('letterboxd', { title: 'Letterboxd', items: feed.items });
+  })();
+});
+
 /// TV ROUTES ///
 
 // router.get('/tv/create', tv_controller.tv_create_get);
@@ -147,6 +147,23 @@ router.get('/tv/:id', tv_controller.tv_detail);
 // router.get('/tv/:id/delete', tv_controller.tv_delete_get);
 
 // router.post('/tv/:id/delete', tv_controller.tv_delete_post);
+
+/// RECENT TV HISTORY ROUTE ///
+
+router.get('/recently_watched', function(req, res, next) {
+  request({
+    method: 'GET',
+    url: 'https://api.trakt.tv/users/noahffiliation/history/shows',
+    headers: {
+      'Content-Type': 'application/json',
+      'trakt-api-version': '2',
+      'trakt-api-key': process.env.TRAKT_API_KEY
+    }}, function (error, response, body) {
+      body = JSON.parse(body);
+      console.log(body[0].show.title, body[0].show.year, body[0].episode.season, body[0].episode.number)
+      res.render('recently_watched', { title: "Recently Watched", history: body });
+  });
+});
 
 /// LASTFM ROUTE ///
 

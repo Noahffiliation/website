@@ -1,0 +1,9 @@
+extends layout
+
+block content
+  h1=title
+
+  ul
+    each item in history
+      li
+        p #{item.show.title} (#{item.show.year}) - Season #{item.episode.season} Episode #{item.episode.number} on #{moment(item.watched_at).format("dddd, MMMM Do YYYY, h:mmA")}
