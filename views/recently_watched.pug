@@ -6,4 +6,4 @@ block content
   ul
     each item in history
       li
-        p #{item.show.title} (#{item.show.year}) - Season #{item.episode.season} Episode #{item.episode.number} on #{moment.utc(item.watched_at).local().format("dddd, MMMM Do YYYY, h:mmA")}
+        p #{item.show.title} (#{item.show.year}) - Season #{item.episode.season} Episode #{item.episode.number} on #{dayjs.utc(item.watched_at).local().format("dddd, MMMM Do YYYY, h:mmA")}

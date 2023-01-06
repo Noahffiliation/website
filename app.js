@@ -12,7 +12,9 @@ const app = express();
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 
-app.locals.moment = require('moment');
+const utc = require('dayjs/plugin/utc');
+const dayjs = require('dayjs');
+app.locals.dayjs = dayjs.extend(utc);
 
 app.use(logger('dev'));
 app.use(express.json());
