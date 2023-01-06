@@ -6,7 +6,7 @@
   },
   "private": true,
   "scripts": {
-    "start": "npm run lint && nodemon ./bin/www",
+    "start": "nodemon ./bin/www",
     "lint": "eslint **/*.js --fix"
   },
   "dependencies": {
