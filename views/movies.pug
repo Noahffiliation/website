@@ -1,0 +1,13 @@
+extends layout
+
+block content
+  h1=title
+
+  ul
+    each movie in movies
+        if movie.movie.year
+            li
+                p #{movie.movie.title} - #{movie.movie.year}
+        //- else
+        //-     li
+        //-         p #{movie.movie.title}
