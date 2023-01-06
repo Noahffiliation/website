@@ -1,0 +1,9 @@
+extends layout
+
+block content
+  h1=title
+
+  ul
+    each item in items
+        li
+            p #{item.title} : #[a(href=item.link) !{item.link}]

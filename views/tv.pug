@@ -1,0 +1,13 @@
+extends layout
+
+block content
+  h1=title
+
+  ul
+    each show in tv
+      if show.show.year
+        li
+          p #{show.show.title} - #{show.show.year}
+      //- else
+      //-   li
+      //-     p #{show.show.title}
