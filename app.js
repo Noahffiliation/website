@@ -3,9 +3,6 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
-require("@babel/core").transform("code", {
-  presets: ["@babel/preset-env"],
-});
 
 var indexRouter = require('./routes/index');
 
