@@ -1,7 +1,7 @@
 const { Client } = require('@notionhq/client');
 const notion = new Client({ auth: process.env.NOTION_KEY });
 
-exports.game_list = (req, res) => {
+exports.gameList = (req, res) => {
 	(async () => {
 		const databaseId = process.env.NOTION_DATABASE_ID;
 		const response = await notion.databases.query({

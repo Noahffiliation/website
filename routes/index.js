@@ -93,7 +93,7 @@ router.get('/stats', function(req, res) {
 
 // router.post('/game/create', game_controller.game_create_post);
 
-router.get('/games', game_controller.game_list);
+router.get('/games', game_controller.gameList);
 
 // router.get('/game/:id', game_controller.game_detail);
 
@@ -111,7 +111,7 @@ router.get('/games', game_controller.game_list);
 
 // router.post('/movie/create', movie_controller.movie_create_post);
 
-router.get('/movies', movie_controller.movie_list);
+router.get('/movies', movie_controller.movieList);
 
 // router.get('/movie/:id', movie_controller.movie_detail);
 
@@ -138,7 +138,7 @@ router.get('/letterboxd', function(req, res) {
 
 // router.post('/tv/create', tv_controller.tv_create_post);
 
-router.get('/tv', tv_controller.tv_list);
+router.get('/tv', tv_controller.tvList);
 
 // router.get('/tv/:id', tv_controller.tv_detail);
 

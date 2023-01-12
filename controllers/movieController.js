@@ -1,21 +1,21 @@
-const request = require('request');
-require('dotenv').config();
+const request = require("request");
+require("dotenv").config();
 
-exports.movie_list = (req, res) => {
+exports.movieList = (req, res) => {
 	request({
-		method: 'GET',
-		url: 'https://api.trakt.tv/users/noahffiliation/watchlist/movies/released',
+		method: "GET",
+		url: "https://api.trakt.tv/users/noahffiliation/watchlist/movies/released",
 		headers: {
-			'Content-Type': 'application/json',
-			'trakt-api-version': '2',
-			'trakt-api-key': process.env.TRAKT_API_KEY,
-		} }, function(error, response, body) {
+			"Content-Type": "application/json",
+			"trakt-api-version": "2",
+			"trakt-api-key": process.env.TRAKT_API_KEY
+		} }, function (error, response, body) {
 		body = JSON.parse(body);
 		body = body.reverse();
-		res.render('movies', { title: 'Movie Watchlist', movies: body });
+		res.render("movies", { title: "Movie Watchlist", movies: body });
 	});
 };
 
-// exports.movie_detail = (req, res, next) => {
+// Exports.movie_detail = (req, res, next) => {
 
 // };
