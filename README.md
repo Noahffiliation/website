@@ -1,7 +1,7 @@
 <h1 align="center">Website</h1>
 
 <p align="center"> Finally getting around to building a website for myself
-    <br> 
+    <br>
 </p>
 
 ## Table of Contents
