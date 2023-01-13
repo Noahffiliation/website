@@ -86,7 +86,7 @@ router.get('/stats', function(req, res) {
 
 router.get('/games', game_controller.gameList);
 
-// router.get('/game/:id', game_controller.game_detail);
+router.get('/game/:id', game_controller.game_detail);
 
 // router.get('/game/:id/update', game_controller.game_update_get);
 

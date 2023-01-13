@@ -1,0 +1,8 @@
+extends layout
+
+block content
+  h1 #{game['Name'].title[0].plain_text}
+
+  p Priority: #{game['Priority'].multi_select[0].name}
+  each platform in game['Platform'].multi_select
+    p Platform: #{platform.name}

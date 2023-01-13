@@ -6,4 +6,5 @@ block content
   ul
     each game in games
       li
-        p #{game}
+        a(href='game/'+game.id) #{game.properties['Name'].title[0].plain_text}
+      br

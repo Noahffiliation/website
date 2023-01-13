@@ -19,13 +19,18 @@ exports.gameList = (req, res) => {
 		});
 		const games = [];
 		response.results.forEach(page => {
-			const game_title = page.properties['Name'].title[0].plain_text;
-			games.push(game_title);
+			games.push(page);
 		});
 		res.render('games', { title: 'Games', games: games });
 	})();
 };
 
-// exports.game_detail = (req, res, next) => {
-
-// };
+exports.game_detail = (req, res) => {
+	(async () => {
+		const pageId = req.params.id;
+		const response = await notion.pages.retrieve({
+			page_id: pageId
+		});
+		res.render('game_detail', { title: 'Game', game: response.properties });
+	})();
+};
