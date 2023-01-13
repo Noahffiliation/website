@@ -10,79 +10,75 @@ const game_controller = require('../controllers/gameController');
 const movie_controller = require('../controllers/movieController');
 const tv_controller = require('../controllers/tvController');
 
-// / HOME ROUTE ///
+// HOME ROUTE
 
 router.get('/', function(req, res) {
 	res.render('index', { title: 'Home' });
 });
 
-// / STATS ROUTE ///
+// STATS ROUTE
 
 router.get('/stats', function(req, res) {
-	let stats = {};
+	const traktHeader = {
+		'Content-Type': 'application/json',
+		'trakt-api-version': '2',
+		'trakt-api-key': process.env.TRAKT_API_KEY
+	};
+	const malHeader = { 'X-MAL-CLIENT-ID': process.env.MAL_CLIENT_ID };
+
 	request({
 		method: 'GET',
 		url: 'https://api.trakt.tv/users/noahffiliation/stats',
-		headers: {
-			'Content-Type': 'application/json',
-			'trakt-api-version': '2',
-			'trakt-api-key': process.env.TRAKT_API_KEY,
-		}}, function(error, response, body) {
+		headers: traktHeader
+	}, function(error, response, body) {
+		body = JSON.parse(body);
+		const movies_watched = body.movies.watched;
+		const shows_watched = body.shows.watched;
+		request({
+			method: 'GET',
+			url: 'https://api.trakt.tv/users/noahffiliation/watchlist/movies',
+			headers: traktHeader
+		}, function(error, response, body) {
 			body = JSON.parse(body);
-			stats['movies_watched'] = body.movies.watched;
-			stats['shows_watched'] = body.shows.watched;
-		}
-	);
-	request({
-		method: 'GET',
-		url: 'https://api.trakt.tv/users/noahffiliation/watchlist/movies',
-		headers: {
-			'Content-Type': 'application/json',
-			'trakt-api-version': '2',
-			'trakt-api-key': process.env.TRAKT_API_KEY,
-		}}, function(error, response, body) {
-			body = JSON.parse(body);
-			stats['movies_length'] = body.length;
-		}
-	);
-	request({
-		method: 'GET',
-		url: 'https://api.trakt.tv/users/noahffiliation/watchlist/shows',
-		headers: {
-			'Content-Type': 'application/json',
-			'trakt-api-version': '2',
-			'trakt-api-key': process.env.TRAKT_API_KEY,
-		}}, function(error, response, body) {
-			body = JSON.parse(body);
-			stats['shows_length'] = body.length;
-		}
-	);
-	request({
-		method: 'GET',
-		url: 'https://api.myanimelist.net/v2/users/noahffiliation/animelist?limit=400&status=completed',
-		headers: {
-			'X-MAL-CLIENT-ID': process.env.MAL_CLIENT_ID,
-		}}, function(error, response, body) {
-			body = JSON.parse(body);
-			stats['anime_completed'] = body.data.length;
-		}
-	);
-	request({
-		method: 'GET',
-		url: 'https://api.myanimelist.net/v2/users/noahffiliation/animelist?limit=400&status=plan_to_watch',
-		headers: {
-			'X-MAL-CLIENT-ID': process.env.MAL_CLIENT_ID,
-		}}, function(error, response, body) {
-			body = JSON.parse(body);
-			stats['movies_total'] = stats['movies_watched'] + stats['movies_length'];
-			stats['shows_total'] = stats['shows_watched'] + stats['shows_length'];
-			stats['anime_total'] = stats['anime_completed'] + body.data.length
-			res.render('stats', { title: 'Stats', stats: stats });
-		}
-	);
+			const movies_length = body.length;
+			request({
+				method: 'GET',
+				url: 'https://api.trakt.tv/users/noahffiliation/watchlist/shows',
+				headers: traktHeader
+			}, function(error, response, body) {
+				body = JSON.parse(body);
+				const shows_length = body.length;
+				request({
+					method: 'GET',
+					url: 'https://api.myanimelist.net/v2/users/noahffiliation/animelist?limit=400&status=completed',
+					headers: malHeader
+				}, function(error, response, body) {
+					body = JSON.parse(body);
+					const anime_completed = body.data.length;
+					request({
+						method: 'GET',
+						url: 'https://api.myanimelist.net/v2/users/noahffiliation/animelist?limit=400&status=plan_to_watch',
+						headers: malHeader
+					}, function(error, response, body) {
+						body = JSON.parse(body);
+						const anime_length = body.data.length;
+						const stats = {
+							'movies_watched': movies_watched,
+							'shows_watched': shows_watched,
+							'anime_completed': anime_completed,
+							'movies_total': movies_watched + movies_length,
+							'shows_total': shows_watched + shows_length,
+							'anime_total': anime_completed + anime_length,
+						};
+						res.render('stats', { title: 'Stats', stats: stats });
+					});
+				});
+			});
+		});
+	});
 });
 
-// / GAME ROUTES ///
+// GAME ROUTES
 
 // router.get('/game/create', game_controller.game_create_get);
 
@@ -100,7 +96,7 @@ router.get('/games', game_controller.gameList);
 
 // router.post('/game/:id/delete', game_controller.game_delete_post);
 
-// / MOVIE ROUTES ///
+// MOVIE ROUTES
 
 // router.get('/movie/create', movie_controller.movie_create_get);
 
@@ -118,7 +114,7 @@ router.get('/movies', movie_controller.movieList);
 
 // router.post('/movie/:id/delete', movie_controller.movie_delete_post);
 
-// / LETTERBOXD ROUTE ///
+// LETTERBOXD ROUTE
 
 router.get('/letterboxd', function(req, res) {
 	(async () => {
@@ -127,7 +123,7 @@ router.get('/letterboxd', function(req, res) {
 	})();
 });
 
-// / TV ROUTES ///
+// TV ROUTES
 
 // router.get('/tv/create', tv_controller.tv_create_get);
 
@@ -145,7 +141,7 @@ router.get('/tv', tv_controller.tvList);
 
 // router.post('/tv/:id/delete', tv_controller.tv_delete_post);
 
-// / RECENT TV HISTORY ROUTE ///
+// RECENT TV HISTORY ROUTE
 
 router.get('/recently_watched', function(req, res) {
 	request({
@@ -157,12 +153,11 @@ router.get('/recently_watched', function(req, res) {
 			'trakt-api-key': process.env.TRAKT_API_KEY,
 		} }, function(error, response, body) {
 		body = JSON.parse(body);
-		// console.log(body[0].watched_at);
 		res.render('recently_watched', { title: 'Recently Watched', history: body });
 	});
 });
 
-// / LASTFM ROUTE ///
+// LASTFM ROUTE
 
 router.get('/lastfm', function(req, res) {
 	const lastfm = new LastFmNode({
