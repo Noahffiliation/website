@@ -131,7 +131,7 @@ router.get('/letterboxd', function(req, res) {
 
 router.get('/tv', tv_controller.tvList);
 
-// router.get('/tv/:id', tv_controller.tv_detail);
+router.get('/tv/:id', tv_controller.tv_detail);
 
 // router.get('/tv/:id/update', tv_controller.tv_update_get);
 

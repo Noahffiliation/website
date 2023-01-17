@@ -7,7 +7,8 @@ block content
     each show in tv
       if show.show.year
         li
-          p #{show.show.title} - #{show.show.year}
+          a(href='/tv/'+show.show.ids.trakt) #{show.show.title} - #{show.show.year}
+        br
       //- else
       //-   li
       //-     p #{show.show.title}
