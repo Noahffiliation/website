@@ -26,6 +26,6 @@ exports.movie_detail = (req, res) => {
 		headers: TRAKT_HEADERS
 		}, function (error, response, body) {
 			body = JSON.parse(body);
-			res.render("movie_detail", { show: body });
+			res.render("movie_detail", { movie: body });
 	});
 };
