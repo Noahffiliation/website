@@ -10,6 +10,13 @@ const game_controller = require('../controllers/gameController');
 const movie_controller = require('../controllers/movieController');
 const tv_controller = require('../controllers/tvController');
 
+const TRAKT_HEADER = {
+	'Content-Type': 'application/json',
+	'trakt-api-version': '2',
+	'trakt-api-key': process.env.TRAKT_API_KEY
+};
+const MAL_HEADER = { 'X-MAL-CLIENT-ID': process.env.MAL_CLIENT_ID };
+
 // HOME ROUTE
 
 router.get('/', function(req, res) {
@@ -19,17 +26,10 @@ router.get('/', function(req, res) {
 // STATS ROUTE
 
 router.get('/stats', function(req, res) {
-	const traktHeader = {
-		'Content-Type': 'application/json',
-		'trakt-api-version': '2',
-		'trakt-api-key': process.env.TRAKT_API_KEY
-	};
-	const malHeader = { 'X-MAL-CLIENT-ID': process.env.MAL_CLIENT_ID };
-
 	request({
 		method: 'GET',
 		url: 'https://api.trakt.tv/users/noahffiliation/stats',
-		headers: traktHeader
+		headers: TRAKT_HEADER
 	}, function(error, response, body) {
 		body = JSON.parse(body);
 		const movies_watched = body.movies.watched;
@@ -37,28 +37,28 @@ router.get('/stats', function(req, res) {
 		request({
 			method: 'GET',
 			url: 'https://api.trakt.tv/users/noahffiliation/watchlist/movies',
-			headers: traktHeader
+			headers: TRAKT_HEADER
 		}, function(error, response, body) {
 			body = JSON.parse(body);
 			const movies_length = body.length;
 			request({
 				method: 'GET',
 				url: 'https://api.trakt.tv/users/noahffiliation/watchlist/shows',
-				headers: traktHeader
+				headers: TRAKT_HEADER
 			}, function(error, response, body) {
 				body = JSON.parse(body);
 				const shows_length = body.length;
 				request({
 					method: 'GET',
 					url: 'https://api.myanimelist.net/v2/users/noahffiliation/animelist?limit=400&status=completed',
-					headers: malHeader
+					headers: MAL_HEADER
 				}, function(error, response, body) {
 					body = JSON.parse(body);
 					const anime_completed = body.data.length;
 					request({
 						method: 'GET',
 						url: 'https://api.myanimelist.net/v2/users/noahffiliation/animelist?limit=400&status=plan_to_watch',
-						headers: malHeader
+						headers: MAL_HEADER
 					}, function(error, response, body) {
 						body = JSON.parse(body);
 						const anime_length = body.data.length;
@@ -146,14 +146,11 @@ router.get('/tv/:id', tv_controller.tv_detail);
 router.get('/recently_watched', function(req, res) {
 	request({
 		method: 'GET',
-		url: 'https://api.trakt.tv/users/noahffiliation/history/shows',
-		headers: {
-			'Content-Type': 'application/json',
-			'trakt-api-version': '2',
-			'trakt-api-key': process.env.TRAKT_API_KEY,
-		} }, function(error, response, body) {
-		body = JSON.parse(body);
-		res.render('recently_watched', { title: 'Recently Watched', history: body });
+		url: 'https://api.trakt.tv/users/noahffiliation/history/shows?limit=25',
+		headers: TRAKT_HEADER
+		}, function(error, response, body) {
+			body = JSON.parse(body);
+			res.render('recently_watched', { title: 'Recently Watched', history: body });
 	});
 });
 
