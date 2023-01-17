@@ -104,7 +104,7 @@ router.get('/game/:id', game_controller.game_detail);
 
 router.get('/movies', movie_controller.movieList);
 
-// router.get('/movie/:id', movie_controller.movie_detail);
+router.get('/movie/:id', movie_controller.movie_detail);
 
 // router.get('/movie/:id/update', movie_controller.movie_update_get);
 

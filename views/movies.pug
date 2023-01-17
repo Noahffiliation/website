@@ -7,7 +7,8 @@ block content
     each movie in movies
         if movie.movie.year
             li
-                p #{movie.movie.title} - #{movie.movie.year}
+                a(href='/movie/'+movie.movie.ids.trakt) #{movie.movie.title} - #{movie.movie.year}
+            br
         //- else
         //-     li
         //-         p #{movie.movie.title}
