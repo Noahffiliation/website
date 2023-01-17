@@ -5,32 +5,32 @@ const request = require('request');
 const LastFmNode = require('lastfm').LastFmNode;
 const Parser = require('rss-parser');
 const parser = new Parser();
-
-const game_controller = require('../controllers/gameController');
-const movie_controller = require('../controllers/movieController');
-const tv_controller = require('../controllers/tvController');
+const { Client } = require('@notionhq/client');
+const notion = new Client({ auth: process.env.NOTION_KEY });
 
 const TRAKT_HEADER = {
 	'Content-Type': 'application/json',
 	'trakt-api-version': '2',
 	'trakt-api-key': process.env.TRAKT_API_KEY
 };
-const MAL_HEADER = { 'X-MAL-CLIENT-ID': process.env.MAL_CLIENT_ID };
+const MAL_HEADER = {
+	'X-MAL-CLIENT-ID': process.env.MAL_CLIENT_ID
+};
 
 // HOME ROUTE
 
-router.get('/', function(req, res) {
+router.get('/', (req, res) => {
 	res.render('index', { title: 'Home' });
 });
 
 // STATS ROUTE
 
-router.get('/stats', function(req, res) {
+router.get('/stats', (req, res) => {
 	request({
 		method: 'GET',
 		url: 'https://api.trakt.tv/users/noahffiliation/stats',
 		headers: TRAKT_HEADER
-	}, function(error, response, body) {
+	}, (error, response, body) => {
 		body = JSON.parse(body);
 		const movies_watched = body.movies.watched;
 		const shows_watched = body.shows.watched;
@@ -38,28 +38,28 @@ router.get('/stats', function(req, res) {
 			method: 'GET',
 			url: 'https://api.trakt.tv/users/noahffiliation/watchlist/movies',
 			headers: TRAKT_HEADER
-		}, function(error, response, body) {
+		}, (error, response, body) => {
 			body = JSON.parse(body);
 			const movies_length = body.length;
 			request({
 				method: 'GET',
 				url: 'https://api.trakt.tv/users/noahffiliation/watchlist/shows',
 				headers: TRAKT_HEADER
-			}, function(error, response, body) {
+			}, (error, response, body) => {
 				body = JSON.parse(body);
 				const shows_length = body.length;
 				request({
 					method: 'GET',
 					url: 'https://api.myanimelist.net/v2/users/noahffiliation/animelist?limit=400&status=completed',
 					headers: MAL_HEADER
-				}, function(error, response, body) {
+				}, (error, response, body) => {
 					body = JSON.parse(body);
 					const anime_completed = body.data.length;
 					request({
 						method: 'GET',
 						url: 'https://api.myanimelist.net/v2/users/noahffiliation/animelist?limit=400&status=plan_to_watch',
 						headers: MAL_HEADER
-					}, function(error, response, body) {
+					}, (error, response, body) => {
 						body = JSON.parse(body);
 						const anime_length = body.data.length;
 						const stats = {
@@ -80,43 +80,68 @@ router.get('/stats', function(req, res) {
 
 // GAME ROUTES
 
-// router.get('/game/create', game_controller.game_create_get);
+router.get('/games', (req, res) => {
+	(async () => {
+		const databaseId = process.env.NOTION_DATABASE_ID;
+		const response = await notion.databases.query({
+			database_id: databaseId,
+			filter: {
+				property: 'Priority',
+				multi_select: {
+					contains: 'Current',
+				},
+			},
+			sorts: [{
+				property: 'Name',
+				direction: 'ascending',
+			}],
+		});
+		const games = [];
+		response.results.forEach(page => {
+			games.push(page);
+		});
+		res.render('games', { title: 'Games', games: games });
+	})();
+});
 
-// router.post('/game/create', game_controller.game_create_post);
-
-router.get('/games', game_controller.gameList);
-
-router.get('/game/:id', game_controller.game_detail);
-
-// router.get('/game/:id/update', game_controller.game_update_get);
-
-// router.post('/game/:id/update', game_controller.game_update_post);
-
-// router.get('/game/:id/delete', game_controller.game_delete_get);
-
-// router.post('/game/:id/delete', game_controller.game_delete_post);
+router.get('/game/:id', (req, res) => {
+	(async () => {
+		const pageId = req.params.id;
+		const response = await notion.pages.retrieve({
+			page_id: pageId
+		});
+		res.render('game_detail', { title: response.properties['Name'].title[0].plain_text, game: response.properties });
+	})();
+});
 
 // MOVIE ROUTES
 
-// router.get('/movie/create', movie_controller.movie_create_get);
+router.get('/movies', (req, res) => {
+	request({
+		method: "GET",
+		url: "https://api.trakt.tv/users/noahffiliation/watchlist/movies/released",
+		headers: TRAKT_HEADER
+	}, (error, response, body) => {
+		body = JSON.parse(body);
+		body = body.reverse();
+		res.render("movies", { title: "Movie Watchlist", movies: body });
+	});
+});
 
-// router.post('/movie/create', movie_controller.movie_create_post);
-
-router.get('/movies', movie_controller.movieList);
-
-router.get('/movie/:id', movie_controller.movie_detail);
-
-// router.get('/movie/:id/update', movie_controller.movie_update_get);
-
-// router.post('/movie/:id/update', movie_controller.movie_update_post);
-
-// router.get('/movie/:id/delete', movie_controller.movie_delete_get);
-
-// router.post('/movie/:id/delete', movie_controller.movie_delete_post);
+router.get('/movie/:id', (req, res) => {
+	request({
+		method: 'GET',
+		url: 'https://api.trakt.tv/movies/'+req.params.id+'?extended=full',
+		headers: TRAKT_HEADER
+	}, (error, response, body) => {
+		body = JSON.parse(body);
+		res.render("movie_detail", { title: body.title , movie: body });
+	});
+});
 
 // LETTERBOXD ROUTE
 
-router.get('/letterboxd', function(req, res) {
+router.get('/letterboxd', (req, res) => {
 	(async () => {
 		const feed = await parser.parseURL('https://letterboxd.com/noahffiliation/rss/');
 		res.render('letterboxd', { title: 'Letterboxd', items: feed.items });
@@ -125,45 +150,52 @@ router.get('/letterboxd', function(req, res) {
 
 // TV ROUTES
 
-// router.get('/tv/create', tv_controller.tv_create_get);
+router.get('/tv', (req, res) => {
+	request({
+		method: "GET",
+		url: "https://api.trakt.tv/users/noahffiliation/watchlist/shows/released",
+		headers: TRAKT_HEADER
+	}, (error, response, body) => {
+		body = JSON.parse(body);
+		body = body.reverse();
+		res.render("tv", { title: "TV Watchlist", tv: body });
+	});
+});
 
-// router.post('/tv/create', tv_controller.tv_create_post);
-
-router.get('/tv', tv_controller.tvList);
-
-router.get('/tv/:id', tv_controller.tv_detail);
-
-// router.get('/tv/:id/update', tv_controller.tv_update_get);
-
-// router.post('/tv/:id/update', tv_controller.tv_update_post);
-
-// router.get('/tv/:id/delete', tv_controller.tv_delete_get);
-
-// router.post('/tv/:id/delete', tv_controller.tv_delete_post);
+router.get('/tv/:id', (req, res) => {
+	request({
+		method: 'GET',
+		url: 'https://api.trakt.tv/shows/'+req.params.id+'?extended=full',
+		headers: TRAKT_HEADER
+	}, (error, response, body) => {
+		body = JSON.parse(body);
+		res.render("tv_detail", { title: body.title, show: body });
+	});
+});
 
 // RECENT TV HISTORY ROUTE
 
-router.get('/recently_watched', function(req, res) {
+router.get('/recently_watched', (req, res) => {
 	request({
 		method: 'GET',
 		url: 'https://api.trakt.tv/users/noahffiliation/history/shows?limit=25',
 		headers: TRAKT_HEADER
-		}, function(error, response, body) {
-			body = JSON.parse(body);
-			res.render('recently_watched', { title: 'Recently Watched', history: body });
+	}, (error, response, body) => {
+		body = JSON.parse(body);
+		res.render('recently_watched', { title: 'Recently Watched', history: body });
 	});
 });
 
 // LASTFM ROUTE
 
-router.get('/lastfm', function(req, res) {
+router.get('/lastfm', (req, res) => {
 	const lastfm = new LastFmNode({
 		api_key: process.env.LASTFM_API_KEY,
 	});
 	lastfm.request('user.getRecentTracks', {
 		user: 'noahffiliation',
 		handlers: {
-			success: function(data) {
+			success: (data) => {
 				res.render('lastfm', { title: 'Last.fm', data: data });
 			},
 		},
