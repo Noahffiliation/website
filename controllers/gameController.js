@@ -31,6 +31,6 @@ exports.game_detail = (req, res) => {
 		const response = await notion.pages.retrieve({
 			page_id: pageId
 		});
-		res.render('game_detail', { title: 'Game', game: response.properties });
+		res.render('game_detail', { title: response.properties['Name'].title[0].plain_text, game: response.properties });
 	})();
 };
