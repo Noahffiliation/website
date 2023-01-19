@@ -5,10 +5,11 @@ block content
 
   ul
     each movie in movies
-        if movie.movie.year
-            li
-                a(href='/movie/'+movie.movie.ids.trakt) #{movie.movie.title} - #{movie.movie.year}
-            br
-        //- else
-        //-     li
-        //-         p #{movie.movie.title}
+      if movie.movie.year
+        li
+          a(href='/movie/'+movie.movie.ids.trakt) #{movie.movie.title} - #{movie.movie.year}
+        br
+      else
+        li
+          a(href='/movie/'+movie.movie.ids.trakt) #{movie.movie.title}
+        br

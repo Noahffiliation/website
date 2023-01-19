@@ -9,6 +9,7 @@ block content
         li
           a(href='/tv/'+show.show.ids.trakt) #{show.show.title} - #{show.show.year}
         br
-      //- else
-      //-   li
-      //-     p #{show.show.title}
+      else
+        li
+          a(href='/tv/'+show.show.ids.trakt) #{show.show.title}
+        br

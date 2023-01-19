@@ -3,5 +3,11 @@ extends layout
 block content
   h1 #{show.title}
 
-  p Year: #{show.year}
-  p Overview: #{show.overview}
+  if show.year
+    p Year: #{show.year}
+  else
+    p Year: Unknown
+  if show.overview
+    p Overview: #{show.overview}
+  else
+    p Overview: Unknown

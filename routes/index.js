@@ -173,16 +173,16 @@ router.get('/tv/:id', (req, res) => {
 	});
 });
 
-// RECENT TV HISTORY ROUTES
+// EPISODE ROUTES
 
-router.get('/recently_watched', (req, res) => {
+router.get('/episodes', (req, res) => {
 	request({
 		method: 'GET',
 		url: 'https://api.trakt.tv/users/noahffiliation/history/shows?limit=25',
 		headers: TRAKT_HEADER
 	}, (error, response, body) => {
 		body = JSON.parse(body);
-		res.render('recently_watched', { title: 'Recently Watched', history: body });
+		res.render('episodes', { title: 'Recently Watched', history: body });
 	});
 });
 

@@ -3,6 +3,15 @@ extends layout
 block content
   h1 #{movie.title}
 
-  p Year: #{movie.year}
-  p Tagline: #{movie.tagline}
-  p Overview: #{movie.overview}
+  if movie.year
+    p Year: #{movie.year}
+  else
+    p Year: Unknown
+  if movie.tagling
+    p Tagline: #{movie.tagline}
+  else
+    p Tagline: Unknown
+  if movie.overview
+    p Overview: #{movie.overview}
+  else
+    p Overview: Unknown
