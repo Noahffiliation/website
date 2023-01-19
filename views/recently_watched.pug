@@ -6,4 +6,5 @@ block content
   ul
     each item in history
       li
-        p #{item.show.title} (#{item.show.year}) - Season #{item.episode.season} Episode #{item.episode.number}
+        a(href='/episode/'+item.show.ids.trakt+'/'+item.episode.season+'/'+item.episode.number) #{item.show.title} (#{item.show.year}) - Season #{item.episode.season} Episode #{item.episode.number}
+      br

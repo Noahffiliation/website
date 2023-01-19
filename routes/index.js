@@ -173,7 +173,7 @@ router.get('/tv/:id', (req, res) => {
 	});
 });
 
-// RECENT TV HISTORY ROUTE
+// RECENT TV HISTORY ROUTES
 
 router.get('/recently_watched', (req, res) => {
 	request({
@@ -183,6 +183,17 @@ router.get('/recently_watched', (req, res) => {
 	}, (error, response, body) => {
 		body = JSON.parse(body);
 		res.render('recently_watched', { title: 'Recently Watched', history: body });
+	});
+});
+
+router.get('/episode/:id/:season/:episode', (req, res) => {
+	request({
+		method: 'GET',
+		url: 'https://api.trakt.tv/shows/'+req.params.id+'/seasons/'+req.params.season+'/episodes/'+req.params.episode+'?extended=full',
+		headers: TRAKT_HEADER
+	}, (error, response, body) => {
+		body = JSON.parse(body);
+		res.render("episode_detail", { title: body.title, episode: body });
 	});
 });
 
