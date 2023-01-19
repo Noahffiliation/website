@@ -4,7 +4,8 @@ const path = require("path");
 const cookieParser = require("cookie-parser");
 const session = require("cookie-session");
 const logger = require("morgan");
-const helmet = require('helmet')
+const helmet = require('helmet');
+const compression = require('compression');
 
 const indexRouter = require("./routes/index");
 
@@ -26,6 +27,7 @@ app.use(session({
 }));
 
 app.use(helmet());
+app.use(compression());
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
