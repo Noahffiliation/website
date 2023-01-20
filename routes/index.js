@@ -7,6 +7,7 @@ const Parser = require('rss-parser');
 const parser = new Parser();
 const { Client } = require('@notionhq/client');
 const notion = new Client({ auth: process.env.NOTION_KEY });
+const rateLimit = require('express-rate-limit');
 
 const TRAKT_HEADER = {
 	'Content-Type': 'application/json',
@@ -19,7 +20,7 @@ const MAL_HEADER = {
 
 // HOME ROUTE
 
-router.get('/', (req, res) => {
+router.get('/', rateLimit(), (req, res) => {
 	res.render('index', { title: 'Home' });
 });
 

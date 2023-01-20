@@ -2,10 +2,12 @@ const createError = require("http-errors");
 const express = require("express");
 const path = require("path");
 const cookieParser = require("cookie-parser");
+const csrf = require('csurf');
 const session = require("cookie-session");
 const logger = require("morgan");
 const helmet = require('helmet');
 const compression = require('compression');
+const rateLimit = require('express-rate-limit');
 
 const indexRouter = require("./routes/index");
 
@@ -32,6 +34,8 @@ app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+app.use(csrf({ cookie: true }));
+app.use(rateLimit());
 app.use(express.static(path.join(__dirname, "public")));
 app.use("/favicon.ico", express.static("public/images/favicon.ico"));
 
