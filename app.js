@@ -19,6 +19,8 @@ app.set("view engine", "pug");
 
 app.set('trust proxy', 1);
 
+app.locals.moment = require('moment');
+
 app.use(session({
 	name: "session",
 	secret: process.env.SESSION_SECRET,
@@ -28,6 +30,12 @@ app.use(session({
 	}
 }));
 
+const limiter = rateLimit({
+	max: 100,
+	windowMs: 60 * 60 * 1000,
+	message: 'Too many requests from this IP, please try again in an hour!'
+})
+
 app.use(helmet());
 app.use(compression());
 app.use(logger("dev"));
@@ -35,7 +43,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(csrf({ cookie: true }));
-app.use(rateLimit());
+app.use(limiter);
 app.use(express.static(path.join(__dirname, "public")));
 app.use("/favicon.ico", express.static("public/images/favicon.ico"));
 

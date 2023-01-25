@@ -6,5 +6,5 @@ block content
   ul
     each item in history
       li
-        a(href='/episode/'+item.show.ids.trakt+'/'+item.episode.season+'/'+item.episode.number) #{item.show.title} (#{item.show.year}) - Season #{item.episode.season} Episode #{item.episode.number}
+        a(href='/episode/'+item.show.ids.trakt+'/'+item.episode.season+'/'+item.episode.number) #{item.show.title} (#{item.show.year}) - Season #{item.episode.season} Episode #{item.episode.number} - #{moment(item.watched_at).format('MMMM Do YYYY, h:mm A')}
       br
