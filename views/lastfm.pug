@@ -4,5 +4,8 @@ block content
   h1=title
   ul
     each track in data.recenttracks.track
-      li #{track.artist["#text"]} - #{track.name}
+      if track.date
+        li #{track.artist["#text"]} - #{track.name} - #{moment(track.date["#text"]).subtract(5, 'hours').format('MMMM Do YYYY, h:mm A')}
+      else
+        li #[strong #{track.artist["#text"]} - #{track.name} - Currently Playing]
       br

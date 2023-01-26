@@ -214,4 +214,19 @@ router.get('/lastfm', (req, res) => {
 	});
 });
 
+router.get('/test', (req, res) => {
+	const lastfm = new LastFmNode({
+		api_key: process.env.LASTFM_API_KEY,
+	});
+	lastfm.request('library.getArtists', {
+		user: 'noahffiliation',
+		handlers: {
+			success: (data) => {
+				console.log(data.artists.artist[0]);
+				res.render('test', { title: 'Test', data: data });
+			},
+		},
+	});
+});
+
 module.exports = router;
