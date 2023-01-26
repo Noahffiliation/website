@@ -4,6 +4,8 @@ block content
   h1=title
 
   ul
-    each item in items
+    - for (i=0; i<50; i++)
       li
-        p #{item.title} : #[a(href=item.link) !{item.link}]
+        p #[strong #{items[i].title} - #{moment(items[i].isoDate).format('MMMM Do YYYY, h:mm A')}]
+          ul
+            li #{items[i].contentSnippet}
