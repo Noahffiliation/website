@@ -32,6 +32,9 @@ router.get('/stats', (req, res) => {
 		url: 'https://api.trakt.tv/users/noahffiliation/stats',
 		headers: TRAKT_HEADER
 	}, (error, response, body) => {
+		if (error) {
+			console.error(error);
+		}
 		body = JSON.parse(body);
 		const movies_watched = body.movies.watched;
 		const shows_watched = body.shows.watched;
@@ -40,6 +43,9 @@ router.get('/stats', (req, res) => {
 			url: 'https://api.trakt.tv/users/noahffiliation/watchlist/movies',
 			headers: TRAKT_HEADER
 		}, (error, response, body) => {
+			if (error) {
+				console.error(error);
+			}
 			body = JSON.parse(body);
 			const movies_length = body.length;
 			request({
@@ -47,6 +53,9 @@ router.get('/stats', (req, res) => {
 				url: 'https://api.trakt.tv/users/noahffiliation/watchlist/shows',
 				headers: TRAKT_HEADER
 			}, (error, response, body) => {
+				if (error) {
+					console.error(error);
+				}
 				body = JSON.parse(body);
 				const shows_length = body.length;
 				request({
@@ -54,6 +63,9 @@ router.get('/stats', (req, res) => {
 					url: 'https://api.myanimelist.net/v2/users/noahffiliation/animelist?limit=400&status=completed',
 					headers: MAL_HEADER
 				}, (error, response, body) => {
+					if (error) {
+						console.error(error);
+					}
 					body = JSON.parse(body);
 					const anime_completed = body.data.length;
 					request({
@@ -61,6 +73,9 @@ router.get('/stats', (req, res) => {
 						url: 'https://api.myanimelist.net/v2/users/noahffiliation/animelist?limit=400&status=plan_to_watch',
 						headers: MAL_HEADER
 					}, (error, response, body) => {
+						if (error) {
+							console.error(error);
+						}
 						body = JSON.parse(body);
 						const anime_length = body.data.length;
 						const stats = {
@@ -87,10 +102,14 @@ router.get('/games', (req, res) => {
 		const response = await notion.databases.query({
 			database_id: databaseId,
 			filter: {
-				property: 'Priority',
-				multi_select: {
-					contains: 'Current',
-				},
+				"or": [
+					{
+						property: 'Priority',
+						multi_select: {
+							contains: 'Current',
+						},
+					},
+				]
 			},
 			sorts: [{
 				property: 'Name',
@@ -123,6 +142,9 @@ router.get('/movies', (req, res) => {
 		url: "https://api.trakt.tv/users/noahffiliation/watchlist/movies/released",
 		headers: TRAKT_HEADER
 	}, (error, response, body) => {
+		if (error) {
+			console.error(error);
+		}
 		body = JSON.parse(body);
 		body = body.reverse();
 		res.render("movies", { title: "Movie Watchlist", movies: body });
@@ -135,6 +157,9 @@ router.get('/movie/:id', (req, res) => {
 		url: 'https://api.trakt.tv/movies/'+req.params.id+'?extended=full',
 		headers: TRAKT_HEADER
 	}, (error, response, body) => {
+		if (error) {
+			console.error(error);
+		}
 		body = JSON.parse(body);
 		res.render("movie_detail", { title: body.title , movie: body });
 	});
@@ -157,6 +182,9 @@ router.get('/tv', (req, res) => {
 		url: "https://api.trakt.tv/users/noahffiliation/watchlist/shows/released",
 		headers: TRAKT_HEADER
 	}, (error, response, body) => {
+		if (error) {
+			console.error(error);
+		}
 		body = JSON.parse(body);
 		body = body.reverse();
 		res.render("tv", { title: "TV Watchlist", tv: body });
@@ -169,6 +197,9 @@ router.get('/tv/:id', (req, res) => {
 		url: 'https://api.trakt.tv/shows/'+req.params.id+'?extended=full',
 		headers: TRAKT_HEADER
 	}, (error, response, body) => {
+		if (error) {
+			console.error(error);
+		}
 		body = JSON.parse(body);
 		res.render("tv_detail", { title: body.title, show: body });
 	});
@@ -182,6 +213,9 @@ router.get('/episodes', (req, res) => {
 		url: 'https://api.trakt.tv/users/noahffiliation/history/shows?limit=25',
 		headers: TRAKT_HEADER
 	}, (error, response, body) => {
+		if (error) {
+			console.error(error);
+		}
 		body = JSON.parse(body);
 		res.render('episodes', { title: 'Recently Watched', history: body });
 	});
@@ -193,6 +227,9 @@ router.get('/episode/:id/:season/:episode', (req, res) => {
 		url: 'https://api.trakt.tv/shows/'+req.params.id+'/seasons/'+req.params.season+'/episodes/'+req.params.episode+'?extended=full',
 		headers: TRAKT_HEADER
 	}, (error, response, body) => {
+		if (error) {
+			console.error(error);
+		}
 		body = JSON.parse(body);
 		res.render("episode_detail", { title: body.title, episode: body });
 	});
