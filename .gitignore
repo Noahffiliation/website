@@ -142,3 +142,5 @@ dist
 # Built Visual Studio Code Extensions
 *.vsix
 .dccache
+routes/test.js
+views/test.pug
