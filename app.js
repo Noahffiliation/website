@@ -8,9 +8,10 @@ const logger = require("morgan");
 const helmet = require('helmet');
 const compression = require('compression');
 const rateLimit = require('express-rate-limit');
+const apicache = require('apicache');
+let cache = apicache.middleware;
 
 const indexRouter = require("./routes/index");
-// const testRouter = require("./routes/test");
 
 const app = express();
 
@@ -45,13 +46,16 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(csrf({ cookie: true }));
 app.use(limiter);
+app.use(cache('5 minutes'));
 app.use(express.static(path.join(__dirname, "public")));
 app.use("/favicon.ico", express.static("public/images/favicon.ico"));
 
 app.disable('x-powered-by');
 
 app.use("/", indexRouter);
-// app.use("/test", testRouter);
+
+const testRouter = require("./routes/test");
+app.use("/test", testRouter);
 
 // Catch 404 and forward to error handler
 app.use((req, res, next) => {
