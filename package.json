@@ -28,7 +28,7 @@
     "octokit": "^2.0.14",
     "pug": "^3.0.2",
     "request": "^2.88.2",
-    "rss-parser": "^3.12.0",
+    "rss-parser": "^3.13.0",
     "spotify-web-api-node": "^5.0.2"
   },
   "devDependencies": {
