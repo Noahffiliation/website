@@ -18,20 +18,23 @@ const MAL_HEADER = {
 	'X-MAL-CLIENT-ID': process.env.MAL_CLIENT_ID
 };
 
+const MAL_LIMIT = 400;
+const TRAKT_LIMIT = 25;
+
 // HOME ROUTE
 
-router.get('/', rateLimit(), (req, res) => {
+router.get('/', rateLimit(), (_req, res) => {
 	res.render('index', { title: 'Home' });
 });
 
 // STATS ROUTE
 
-router.get('/stats', (req, res) => {
+router.get('/stats', (_req, res) => {
 	request({
 		method: 'GET',
 		url: 'https://api.trakt.tv/users/noahffiliation/stats',
 		headers: TRAKT_HEADER
-	}, (error, response, body) => {
+	}, (error, _response, body) => {
 		if (error) {
 			console.error(error);
 		}
@@ -42,7 +45,7 @@ router.get('/stats', (req, res) => {
 			method: 'GET',
 			url: 'https://api.trakt.tv/users/noahffiliation/watchlist/movies',
 			headers: TRAKT_HEADER
-		}, (error, response, body) => {
+		}, (error, _response, body) => {
 			if (error) {
 				console.error(error);
 			}
@@ -52,7 +55,7 @@ router.get('/stats', (req, res) => {
 				method: 'GET',
 				url: 'https://api.trakt.tv/users/noahffiliation/watchlist/shows',
 				headers: TRAKT_HEADER
-			}, (error, response, body) => {
+			}, (error, _response, body) => {
 				if (error) {
 					console.error(error);
 				}
@@ -60,9 +63,9 @@ router.get('/stats', (req, res) => {
 				const shows_length = body.length;
 				request({
 					method: 'GET',
-					url: 'https://api.myanimelist.net/v2/users/noahffiliation/animelist?limit=400&status=completed',
+					url: 'https://api.myanimelist.net/v2/users/noahffiliation/animelist?limit='+MAL_LIMIT+'&status=completed',
 					headers: MAL_HEADER
-				}, (error, response, body) => {
+				}, (error, _response, body) => {
 					if (error) {
 						console.error(error);
 					}
@@ -70,9 +73,9 @@ router.get('/stats', (req, res) => {
 					const anime_completed = body.data.length;
 					request({
 						method: 'GET',
-						url: 'https://api.myanimelist.net/v2/users/noahffiliation/animelist?limit=400&status=plan_to_watch',
+						url: 'https://api.myanimelist.net/v2/users/noahffiliation/animelist?limit='+MAL_LIMIT+'&status=plan_to_watch',
 						headers: MAL_HEADER
-					}, (error, response, body) => {
+					}, (error, _response, body) => {
 						if (error) {
 							console.error(error);
 						}
@@ -96,7 +99,7 @@ router.get('/stats', (req, res) => {
 
 // GAME ROUTES
 
-router.get('/games', (req, res) => {
+router.get('/games', (_req, res) => {
 	(async () => {
 		const databaseId = process.env.NOTION_DATABASE_ID;
 		const response = await notion.databases.query({
@@ -136,12 +139,12 @@ router.get('/game/:id', (req, res) => {
 
 // MOVIE ROUTES
 
-router.get('/movies', (req, res) => {
+router.get('/movies', (_req, res) => {
 	request({
 		method: "GET",
 		url: "https://api.trakt.tv/users/noahffiliation/watchlist/movies/released",
 		headers: TRAKT_HEADER
-	}, (error, response, body) => {
+	}, (error, _response, body) => {
 		if (error) {
 			console.error(error);
 		}
@@ -156,7 +159,7 @@ router.get('/movie/:id', (req, res) => {
 		method: 'GET',
 		url: 'https://api.trakt.tv/movies/'+req.params.id+'?extended=full',
 		headers: TRAKT_HEADER
-	}, (error, response, body) => {
+	}, (error, _response, body) => {
 		if (error) {
 			console.error(error);
 		}
@@ -167,7 +170,7 @@ router.get('/movie/:id', (req, res) => {
 
 // LETTERBOXD ROUTE
 
-router.get('/letterboxd', (req, res) => {
+router.get('/letterboxd', (_req, res) => {
 	(async () => {
 		const feed = await parser.parseURL('https://letterboxd.com/noahffiliation/rss/');
 		res.render('letterboxd', { title: 'Letterboxd', items: feed.items });
@@ -176,12 +179,12 @@ router.get('/letterboxd', (req, res) => {
 
 // TV ROUTES
 
-router.get('/tv', (req, res) => {
+router.get('/tv', (_req, res) => {
 	request({
 		method: "GET",
 		url: "https://api.trakt.tv/users/noahffiliation/watchlist/shows/released",
 		headers: TRAKT_HEADER
-	}, (error, response, body) => {
+	}, (error, _response, body) => {
 		if (error) {
 			console.error(error);
 		}
@@ -196,7 +199,7 @@ router.get('/tv/:id', (req, res) => {
 		method: 'GET',
 		url: 'https://api.trakt.tv/shows/'+req.params.id+'?extended=full',
 		headers: TRAKT_HEADER
-	}, (error, response, body) => {
+	}, (error, _response, body) => {
 		if (error) {
 			console.error(error);
 		}
@@ -207,12 +210,12 @@ router.get('/tv/:id', (req, res) => {
 
 // EPISODE ROUTES
 
-router.get('/episodes', (req, res) => {
+router.get('/episodes', (_req, res) => {
 	request({
 		method: 'GET',
-		url: 'https://api.trakt.tv/users/noahffiliation/history/shows?limit=25',
+		url: 'https://api.trakt.tv/users/noahffiliation/history/shows?limit='+TRAKT_LIMIT,
 		headers: TRAKT_HEADER
-	}, (error, response, body) => {
+	}, (error, _response, body) => {
 		if (error) {
 			console.error(error);
 		}
@@ -226,7 +229,7 @@ router.get('/episode/:id/:season/:episode', (req, res) => {
 		method: 'GET',
 		url: 'https://api.trakt.tv/shows/'+req.params.id+'/seasons/'+req.params.season+'/episodes/'+req.params.episode+'?extended=full',
 		headers: TRAKT_HEADER
-	}, (error, response, body) => {
+	}, (error, _response, body) => {
 		if (error) {
 			console.error(error);
 		}
@@ -237,7 +240,7 @@ router.get('/episode/:id/:season/:episode', (req, res) => {
 
 // LASTFM ROUTE
 
-router.get('/lastfm', (req, res) => {
+router.get('/lastfm', (_req, res) => {
 	const lastfm = new LastFmNode({
 		api_key: process.env.LASTFM_API_KEY,
 	});
