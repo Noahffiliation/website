@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 require('dotenv').config();
-const request = require('request');
+const axios = require('axios');
 const LastFmNode = require('lastfm').LastFmNode;
 const Parser = require('rss-parser');
 const parser = new Parser();
@@ -30,57 +30,37 @@ router.get('/', rateLimit(), (_req, res) => {
 // STATS ROUTE
 
 router.get('/stats', (_req, res) => {
-	request({
+	axios({
 		method: 'GET',
 		url: 'https://api.trakt.tv/users/noahffiliation/stats',
 		headers: TRAKT_HEADER
-	}, (error, _response, body) => {
-		if (error) {
-			console.error(error);
-		}
-		body = JSON.parse(body);
-		const movies_watched = body.movies.watched;
-		const shows_watched = body.shows.watched;
-		request({
+	}).then((response) => {
+		const movies_watched = response.data.movies.watched;
+		const shows_watched = response.data.shows.watched;
+		axios({
 			method: 'GET',
 			url: 'https://api.trakt.tv/users/noahffiliation/watchlist/movies',
 			headers: TRAKT_HEADER
-		}, (error, _response, body) => {
-			if (error) {
-				console.error(error);
-			}
-			body = JSON.parse(body);
-			const movies_length = body.length;
-			request({
+		}).then((response) => {
+			const movies_length = response.data.length;
+			axios({
 				method: 'GET',
 				url: 'https://api.trakt.tv/users/noahffiliation/watchlist/shows',
 				headers: TRAKT_HEADER
-			}, (error, _response, body) => {
-				if (error) {
-					console.error(error);
-				}
-				body = JSON.parse(body);
-				const shows_length = body.length;
-				request({
+			}).then((response) => {
+				const shows_length = response.data.length;
+				axios({
 					method: 'GET',
 					url: 'https://api.myanimelist.net/v2/users/noahffiliation/animelist?limit='+MAL_LIMIT+'&status=completed',
 					headers: MAL_HEADER
-				}, (error, _response, body) => {
-					if (error) {
-						console.error(error);
-					}
-					body = JSON.parse(body);
-					const anime_completed = body.data.length;
-					request({
+				}).then((response) => {
+					const anime_completed = response.data.data.length;
+					axios({
 						method: 'GET',
 						url: 'https://api.myanimelist.net/v2/users/noahffiliation/animelist?limit='+MAL_LIMIT+'&status=plan_to_watch',
 						headers: MAL_HEADER
-					}, (error, _response, body) => {
-						if (error) {
-							console.error(error);
-						}
-						body = JSON.parse(body);
-						const anime_length = body.data.length;
+					}).then((response) => {
+						const anime_length = response.data.data.length;
 						const stats = {
 							'movies_watched': movies_watched,
 							'shows_watched': shows_watched,
@@ -90,10 +70,20 @@ router.get('/stats', (_req, res) => {
 							'anime_total': anime_completed + anime_length,
 						};
 						res.render('stats', { title: 'Stats', stats: stats });
+					}).catch((error) => {
+						console.error(error);
 					});
+				}).catch((error) => {
+					console.error(error);
 				});
+			}).catch((error) => {
+				console.error(error);
 			});
+		}).catch((error) => {
+			console.error(error);
 		});
+	}).catch((error) => {
+		console.error(error);
 	});
 });
 
@@ -140,31 +130,27 @@ router.get('/game/:id', (req, res) => {
 // MOVIE ROUTES
 
 router.get('/movies', (_req, res) => {
-	request({
+	axios({
 		method: "GET",
 		url: "https://api.trakt.tv/users/noahffiliation/watchlist/movies/released",
 		headers: TRAKT_HEADER
-	}, (error, _response, body) => {
-		if (error) {
-			console.error(error);
-		}
-		body = JSON.parse(body);
-		body = body.reverse();
-		res.render("movies", { title: "Movie Watchlist", movies: body });
+	}).then((response) => {
+		response.data = response.data.reverse();
+		res.render("movies", { title: "Movie Watchlist", movies: response.data });
+	}).catch((error) => {
+		console.error(error);
 	});
 });
 
 router.get('/movie/:id', (req, res) => {
-	request({
+	axios({
 		method: 'GET',
 		url: 'https://api.trakt.tv/movies/'+req.params.id+'?extended=full',
 		headers: TRAKT_HEADER
-	}, (error, _response, body) => {
-		if (error) {
-			console.error(error);
-		}
-		body = JSON.parse(body);
-		res.render("movie_detail", { title: body.title , movie: body });
+	}).then((response) => {
+		res.render("movie_detail", { title: response.title , movie: response });
+	}).catch((error) => {
+		console.error(error);
 	});
 });
 
@@ -180,61 +166,53 @@ router.get('/letterboxd', (_req, res) => {
 // TV ROUTES
 
 router.get('/tv', (_req, res) => {
-	request({
+	axios({
 		method: "GET",
 		url: "https://api.trakt.tv/users/noahffiliation/watchlist/shows/released",
 		headers: TRAKT_HEADER
-	}, (error, _response, body) => {
-		if (error) {
-			console.error(error);
-		}
-		body = JSON.parse(body);
-		body = body.reverse();
-		res.render("tv", { title: "TV Watchlist", tv: body });
+	}).then((response) => {
+		response.data = response.data.reverse();
+		res.render("tv", { title: "TV Watchlist", tv: response.data });
+	}).catch((error) => {
+		console.error(error);
 	});
 });
 
 router.get('/tv/:id', (req, res) => {
-	request({
+	axios({
 		method: 'GET',
 		url: 'https://api.trakt.tv/shows/'+req.params.id+'?extended=full',
 		headers: TRAKT_HEADER
-	}, (error, _response, body) => {
-		if (error) {
-			console.error(error);
-		}
-		body = JSON.parse(body);
-		res.render("tv_detail", { title: body.title, show: body });
+	}).then((response) => {
+		res.render("tv_detail", { title: response.data.title, show: response.data });
+	}).catch((error) => {
+		console.error(error);
 	});
 });
 
 // EPISODE ROUTES
 
 router.get('/episodes', (_req, res) => {
-	request({
+	axios({
 		method: 'GET',
 		url: 'https://api.trakt.tv/users/noahffiliation/history/shows?limit='+TRAKT_LIMIT,
 		headers: TRAKT_HEADER
-	}, (error, _response, body) => {
-		if (error) {
-			console.error(error);
-		}
-		body = JSON.parse(body);
-		res.render('episodes', { title: 'Recently Watched', history: body });
+	}).then((response) => {
+		res.render('episodes', { title: 'Recently Watched', history: response.data });
+	}).catch((error) => {
+		console.error(error);
 	});
 });
 
 router.get('/episode/:id/:season/:episode', (req, res) => {
-	request({
+	axios({
 		method: 'GET',
 		url: 'https://api.trakt.tv/shows/'+req.params.id+'/seasons/'+req.params.season+'/episodes/'+req.params.episode+'?extended=full',
 		headers: TRAKT_HEADER
-	}, (error, _response, body) => {
-		if (error) {
-			console.error(error);
-		}
-		body = JSON.parse(body);
-		res.render("episode_detail", { title: body.title, episode: body });
+	}).then((response) => {
+		res.render("episode_detail", { title: response.data.title, episode: response.data });
+	}).catch((error) => {
+		console.error(error);
 	});
 });
 
