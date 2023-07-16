@@ -11,7 +11,7 @@
     "lint": "eslint **/*.js --fix"
   },
   "dependencies": {
-    "@notionhq/client": "^2.2.6",
+    "@notionhq/client": "^2.2.7",
     "apicache": "^1.6.3",
     "axios": "^1.4.0",
     "compression": "^1.7.4",
@@ -26,14 +26,14 @@
     "lastfm": "^0.9.4",
     "moment": "^2.29.4",
     "morgan": "^1.10.0",
-    "octokit": "^2.0.14",
+    "octokit": "^3.0.0",
     "pug": "^3.0.2",
     "rss-parser": "^3.13.0",
     "spotify-web-api-node": "^5.0.2"
   },
   "devDependencies": {
     "dotenv": "^16.3.1",
-    "eslint": "^8.44.0",
-    "nodemon": "^3.0.0"
+    "eslint": "^8.45.0",
+    "nodemon": "^3.0.1"
   }
 }
