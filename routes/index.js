@@ -213,7 +213,7 @@ router.get('/episodes', (_req, res) => {
 });
 
 router.get('/episode/:id/:season/:episode', (req, res) => {
-	if (/^\d+$/.test(req.params.id) || /^\d+$/.test(req.params.season) || /^\d+$/.test(req.params.episode)) {
+	if (/^\d+$/.test(req.params.id) && /^\d+$/.test(req.params.season) && /^\d+$/.test(req.params.episode)) {
 		axios({
 			method: 'GET',
 			url: 'https://api.trakt.tv/shows/'+req.params.id+'/seasons/'+req.params.season+'/episodes/'+req.params.episode+'?extended=full',
