@@ -143,15 +143,19 @@ router.get('/movies', (_req, res) => {
 });
 
 router.get('/movie/:id', (req, res) => {
-	axios({
-		method: 'GET',
-		url: 'https://api.trakt.tv/movies/'+req.params.id+'?extended=full',
-		headers: TRAKT_HEADER
-	}).then((response) => {
-		res.render("movie_detail", { title: response.title , movie: response });
-	}).catch((error) => {
-		console.error(error);
-	});
+	if (/^\d+$/.test(req.params.id)) {
+		axios({
+			method: 'GET',
+			url: 'https://api.trakt.tv/movies/'+req.params.id+'?extended=full',
+			headers: TRAKT_HEADER
+		}).then((response) => {
+			res.render("movie_detail", { title: response.title , movie: response });
+		}).catch((error) => {
+			console.error(error);
+		});
+	} else {
+		res.redirect('/movies');
+	}
 });
 
 // LETTERBOXD ROUTE
@@ -179,15 +183,19 @@ router.get('/tv', (_req, res) => {
 });
 
 router.get('/tv/:id', (req, res) => {
-	axios({
-		method: 'GET',
-		url: 'https://api.trakt.tv/shows/'+req.params.id+'?extended=full',
-		headers: TRAKT_HEADER
-	}).then((response) => {
-		res.render("tv_detail", { title: response.data.title, show: response.data });
-	}).catch((error) => {
-		console.error(error);
-	});
+	if (/^\d+$/.test(req.params.id)) {
+		axios({
+			method: 'GET',
+			url: 'https://api.trakt.tv/shows/'+req.params.id+'?extended=full',
+			headers: TRAKT_HEADER
+		}).then((response) => {
+			res.render("tv_detail", { title: response.data.title, show: response.data });
+		}).catch((error) => {
+			console.error(error);
+		});
+	} else {
+		res.redirect('/tv');
+	}
 });
 
 // EPISODE ROUTES
@@ -205,15 +213,19 @@ router.get('/episodes', (_req, res) => {
 });
 
 router.get('/episode/:id/:season/:episode', (req, res) => {
-	axios({
-		method: 'GET',
-		url: 'https://api.trakt.tv/shows/'+req.params.id+'/seasons/'+req.params.season+'/episodes/'+req.params.episode+'?extended=full',
-		headers: TRAKT_HEADER
-	}).then((response) => {
-		res.render("episode_detail", { title: response.data.title, episode: response.data });
-	}).catch((error) => {
-		console.error(error);
-	});
+	if (/^\d+$/.test(req.params.id) || /^\d+$/.test(req.params.season) || /^\d+$/.test(req.params.episode)) {
+		axios({
+			method: 'GET',
+			url: 'https://api.trakt.tv/shows/'+req.params.id+'/seasons/'+req.params.season+'/episodes/'+req.params.episode+'?extended=full',
+			headers: TRAKT_HEADER
+		}).then((response) => {
+			res.render("episode_detail", { title: response.data.title, episode: response.data });
+		}).catch((error) => {
+			console.error(error);
+		});
+	} else {
+		res.redirect('/episodes');
+	}
 });
 
 // LASTFM ROUTE
