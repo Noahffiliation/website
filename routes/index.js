@@ -29,62 +29,40 @@ router.get('/', rateLimit(), (_req, res) => {
 
 // STATS ROUTE
 
-router.get('/stats', (_req, res) => {
-	axios({
-		method: 'GET',
-		url: 'https://api.trakt.tv/users/noahffiliation/stats',
-		headers: TRAKT_HEADER
-	}).then((response) => {
-		const movies_watched = response.data.movies.watched;
-		const shows_watched = response.data.shows.watched;
-		axios({
-			method: 'GET',
-			url: 'https://api.trakt.tv/users/noahffiliation/watchlist/movies',
-			headers: TRAKT_HEADER
-		}).then((response) => {
-			const movies_length = response.data.length;
-			axios({
-				method: 'GET',
-				url: 'https://api.trakt.tv/users/noahffiliation/watchlist/shows',
-				headers: TRAKT_HEADER
-			}).then((response) => {
-				const shows_length = response.data.length;
-				axios({
-					method: 'GET',
-					url: 'https://api.myanimelist.net/v2/users/noahffiliation/animelist?limit='+MAL_LIMIT+'&status=completed',
-					headers: MAL_HEADER
-				}).then((response) => {
-					const anime_completed = response.data.data.length;
-					axios({
-						method: 'GET',
-						url: 'https://api.myanimelist.net/v2/users/noahffiliation/animelist?limit='+MAL_LIMIT+'&status=plan_to_watch',
-						headers: MAL_HEADER
-					}).then((response) => {
-						const anime_length = response.data.data.length;
-						const stats = {
-							'movies_watched': movies_watched,
-							'shows_watched': shows_watched,
-							'anime_completed': anime_completed,
-							'movies_total': movies_watched + movies_length,
-							'shows_total': shows_watched + shows_length,
-							'anime_total': anime_completed + anime_length,
-						};
-						res.render('stats', { title: 'Stats', stats: stats });
-					}).catch((error) => {
-						console.error(error);
-					});
-				}).catch((error) => {
-					console.error(error);
-				});
-			}).catch((error) => {
-				console.error(error);
-			});
-		}).catch((error) => {
-			console.error(error);
-		});
-	}).catch((error) => {
+const getStats = async () => {
+	try {
+		const statsUrls = [
+			'https://api.trakt.tv/users/noahffiliation/stats',
+			'https://api.trakt.tv/users/noahffiliation/watchlist/movies',
+			'https://api.trakt.tv/users/noahffiliation/watchlist/shows',
+			'https://api.myanimelist.net/v2/users/noahffiliation/animelist?limit='+MAL_LIMIT+'&status=completed',
+			'https://api.myanimelist.net/v2/users/noahffiliation/animelist?limit='+MAL_LIMIT+'&status=plan_to_watch'
+		];
+		const headers = [
+			TRAKT_HEADER,
+			TRAKT_HEADER,
+			TRAKT_HEADER,
+			MAL_HEADER,
+			MAL_HEADER
+		];
+		const responses = await Promise.all(statsUrls.map((url, index) => axios.get(url, { headers: headers[index] })));
+		const stats = {
+			'movies_watched': responses[0].data.movies.watched,
+			'shows_watched': responses[0].data.shows.watched,
+			'anime_completed': responses[3].data.data.length,
+			'movies_total': responses[0].data.movies.watched + responses[1].data.length,
+			'shows_total': responses[0].data.shows.watched + responses[2].data.length,
+			'anime_total': responses[3].data.data.length + responses[4].data.data.length,
+		};
+		return stats;
+	} catch (error) {
 		console.error(error);
-	});
+	}
+};
+
+router.get('/stats', async (_req, res) => {
+	const stats = await getStats();
+	res.render('stats', { title: 'Stats', stats: stats });
 });
 
 // GAME ROUTES
