@@ -11,7 +11,7 @@
     "lint": "eslint **/*.js --fix"
   },
   "dependencies": {
-    "@notionhq/client": "^2.2.12",
+    "@notionhq/client": "^2.2.13",
     "apicache": "^1.6.3",
     "axios": "^1.5.0",
     "compression": "^1.7.4",
