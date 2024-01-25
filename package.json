@@ -13,7 +13,7 @@
   "dependencies": {
     "@notionhq/client": "^2.2.14",
     "apicache": "^1.6.3",
-    "axios": "^1.6.5",
+    "axios": "^1.6.7",
     "compression": "^1.7.4",
     "cookie-parser": "~1.4.4",
     "cookie-session": "^2.1.0",
