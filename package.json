@@ -30,10 +30,5 @@
     "pug": "^3.0.2",
     "rss-parser": "^3.13.0",
     "spotify-web-api-node": "^5.0.2"
-  },
-  "devDependencies": {
-    "dotenv": "^16.4.5",
-    "eslint": "^9.2.0",
-    "nodemon": "^3.1.0"
   }
 }
