@@ -7,5 +7,9 @@
         "parens",
         "recenttracks",
         "Watchlist"
-    ]
+    ],
+    "sonarlint.connectedMode.project": {
+        "connectionId": "noahffiliation",
+        "projectKey": "Noahffiliation_website"
+    }
 }

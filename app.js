@@ -53,9 +53,6 @@ app.disable('x-powered-by');
 
 app.use("/", indexRouter);
 
-// const testRouter = require("./routes/test");
-// app.use("/test", testRouter);
-
 // Catch 404 and forward to error handler
 app.use((_req, _res, next) => {
 	next(createError(404));
