@@ -1,6 +1,6 @@
 const createError = require("http-errors");
 const express = require("express");
-const path = require("path");
+import path from 'node:path'
 const cookieParser = require("cookie-parser");
 const session = require("cookie-session");
 const logger = require("morgan");

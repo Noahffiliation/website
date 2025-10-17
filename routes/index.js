@@ -88,9 +88,9 @@ router.get('/games', (_req, res) => {
 			}],
 		});
 		const games = [];
-		response.results.forEach(page => {
+		for (const page of response.results) {
 			games.push(page);
-		});
+		}
 		res.render('games', { title: 'Games', games: games });
 	})();
 });
