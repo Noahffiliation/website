@@ -166,9 +166,10 @@ router.get('/tv', (_req, res) => {
 
 router.get('/tv/:id', (req, res) => {
 	if (/^\d+$/.test(req.params.id)) {
+		const id = encodeURIComponent(req.query.id);
 		axios({
 			method: 'GET',
-			url: 'https://api.trakt.tv/shows/'+req.params.id+'?extended=full',
+			url: 'https://api.trakt.tv/shows/'+id+'?extended=full',
 			headers: TRAKT_HEADER
 		}).then((response) => {
 			res.render("tv_detail", { title: response.data.title, show: response.data });
@@ -196,10 +197,12 @@ router.get('/episodes', (_req, res) => {
 
 router.get('/episode/:id/:season/:episode', (req, res) => {
 	if (/^\d+$/.test(req.params.id) && /^\d+$/.test(req.params.season) && /^\d+$/.test(req.params.episode)) {
-		const episodeId = encodeURIComponent(req.params.id);
+		const season = encodeURIComponent(req.query.season);
+		const episode = encodeURIComponent(req.query.episode);
+		const episodeId = encodeURIComponent(req.query.id);
 		axios({
 			method: 'GET',
-			url: `https://api.trakt.tv/shows/${episodeId}/seasons/${req.params.season}/episodes/${req.params.episode}?extended=full`,
+			url: `https://api.trakt.tv/shows/${episodeId}/seasons/${season}/episodes/${episode}?extended=full`,
 			headers: TRAKT_HEADER
 		}).then((response) => {
 			res.render("episode_detail", { title: response.data.title, episode: response.data });
