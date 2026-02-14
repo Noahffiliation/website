@@ -1,5 +1,6 @@
 const request = require('supertest');
 const express = require('express');
+process.env.SESSION_SECRET = 'test-secret'; // Fix for CI: Ensure secret is present before app init
 const app = require('../app');
 const axios = require('axios');
 const Parser = require('rss-parser');
