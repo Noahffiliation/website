@@ -35,8 +35,8 @@ const getStats = async () => {
 			'https://api.trakt.tv/users/noahffiliation/stats',
 			'https://api.trakt.tv/users/noahffiliation/watchlist/movies',
 			'https://api.trakt.tv/users/noahffiliation/watchlist/shows',
-			'https://api.myanimelist.net/v2/users/noahffiliation/animelist?limit='+MAL_LIMIT+'&status=completed',
-			'https://api.myanimelist.net/v2/users/noahffiliation/animelist?limit='+MAL_LIMIT+'&status=plan_to_watch'
+			'https://api.myanimelist.net/v2/users/noahffiliation/animelist?limit=' + MAL_LIMIT + '&status=completed',
+			'https://api.myanimelist.net/v2/users/noahffiliation/animelist?limit=' + MAL_LIMIT + '&status=plan_to_watch'
 		];
 		const headers = [
 			TRAKT_HEADER,
@@ -107,7 +107,7 @@ router.get('/game/:id', (req, res) => {
 
 // MOVIE ROUTES
 
-router.get('/movies', (_req, res) => {
+router.get('/movies', (_req, res, next) => {
 	axios({
 		method: "GET",
 		url: "https://api.trakt.tv/users/noahffiliation/watchlist/movies/released",
@@ -116,7 +116,7 @@ router.get('/movies', (_req, res) => {
 		response.data = response.data.reverse();
 		res.render("movies", { title: "Movie Watchlist", movies: response.data });
 	}).catch((error) => {
-		console.error(error);
+		next(error);
 	});
 });
 
@@ -131,7 +131,7 @@ router.get('/movie/:id', (req, res) => {
 				extended: 'full'
 			}
 		}).then((response) => {
-			res.render("movie_detail", { title: response.title , movie: response });
+			res.render("movie_detail", { title: response.title, movie: response });
 		}).catch((error) => {
 			console.error(error);
 		});
@@ -169,7 +169,7 @@ router.get('/tv/:id', (req, res) => {
 		const id = encodeURIComponent(req.query.id);
 		axios({
 			method: 'GET',
-			url: 'https://api.trakt.tv/shows/'+id+'?extended=full',
+			url: 'https://api.trakt.tv/shows/' + id + '?extended=full',
 			headers: TRAKT_HEADER
 		}).then((response) => {
 			res.render("tv_detail", { title: response.data.title, show: response.data });
@@ -186,7 +186,7 @@ router.get('/tv/:id', (req, res) => {
 router.get('/episodes', (_req, res) => {
 	axios({
 		method: 'GET',
-		url: 'https://api.trakt.tv/users/noahffiliation/history/shows?limit='+TRAKT_LIMIT,
+		url: 'https://api.trakt.tv/users/noahffiliation/history/shows?limit=' + TRAKT_LIMIT,
 		headers: TRAKT_HEADER
 	}).then((response) => {
 		res.render('episodes', { title: 'Recently Watched', history: response.data });

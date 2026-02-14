@@ -3,6 +3,7 @@ module.exports = {
     coverageDirectory: 'coverage',
     collectCoverageFrom: [
         '**/*.js',
+        '**/*.mjs',
         '!**/node_modules/**',
         '!**/coverage/**',
         '!**/jest.config.js',
