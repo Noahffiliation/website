@@ -6,8 +6,8 @@
     "start": "node ./bin/www",
     "dev": "nodemon ./bin/www",
     "lint": "eslint **/*.js --fix",
-    "test": "jest",
-    "test:coverage": "jest --coverage --forceExit"
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "test:coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage --forceExit"
   },
   "dependencies": {
     "@notionhq/client": "^5.9.0",
@@ -16,6 +16,7 @@
     "compression": "^1.8.1",
     "cookie-parser": "~1.4.7",
     "cookie-session": "^2.1.1",
+    "csurf": "^1.2.2",
     "debug": "^4.4.3",
     "dotenv": "^17.3.1",
     "express": "^5.2.1",

@@ -1,7 +1,10 @@
+import { createRequire } from "node:module";
+const require = createRequire(import.meta.url);
 const createError = require("http-errors");
 const express = require("express");
-const path = require("path");
+import path from 'node:path'
 const cookieParser = require("cookie-parser");
+const csrf = require("csurf");
 const session = require("cookie-session");
 const logger = require("morgan");
 const helmet = require('helmet');
@@ -9,6 +12,10 @@ const compression = require('compression');
 const rateLimit = require('express-rate-limit');
 const apicache = require('apicache');
 let cache = apicache.middleware;
+
+import { fileURLToPath } from "node:url";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const indexRouter = require("./routes/index");
 
@@ -44,6 +51,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 app.use(cookieParser());
+app.use(csrf());
 app.use(limiter);
 app.use(cache('5 minutes'));
 app.use(express.static(path.join(__dirname, "public")));
@@ -69,4 +77,4 @@ app.use((err, req, res) => {
 	res.render("error");
 });
 
-module.exports = app;
+export default app;

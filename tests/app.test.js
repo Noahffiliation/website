@@ -1,7 +1,8 @@
 const request = require('supertest');
 const express = require('express');
 process.env.SESSION_SECRET = 'test-secret'; // Fix for CI: Ensure secret is present before app init
-const app = require('../app');
+// const app = require('../app');
+let app;
 const axios = require('axios');
 const Parser = require('rss-parser');
 const { Client } = require('@notionhq/client');
@@ -53,6 +54,15 @@ jest.mock('lastfm', () => {
 });
 
 describe('App and Routes', () => {
+    beforeAll(async () => {
+        try {
+            app = (await import('../app.mjs')).default;
+        } catch (error) {
+            console.error('Failed to import app.mjs:', error);
+            throw error;
+        }
+    });
+
     afterEach(() => {
         jest.clearAllMocks();
     });
