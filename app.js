@@ -1,6 +1,6 @@
 const createError = require("http-errors");
 const express = require("express");
-import path from 'node:path'
+const path = require("path");
 const cookieParser = require("cookie-parser");
 const session = require("cookie-session");
 const logger = require("morgan");
@@ -42,7 +42,7 @@ app.use(compression());
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(express.csrf());
+
 app.use(cookieParser());
 app.use(limiter);
 app.use(cache('5 minutes'));
@@ -59,7 +59,7 @@ app.use((_req, _res, next) => {
 });
 
 // Error handler
-app.use((err, req, res) =>{
+app.use((err, req, res) => {
 	// Set locals, only providing error in development
 	res.locals.message = err.message;
 	res.locals.error = req.app.get("env") === "development" ? err : {};
