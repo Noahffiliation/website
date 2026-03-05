@@ -29,6 +29,9 @@ app.set('trust proxy', 1);
 
 app.locals.moment = require('moment');
 
+app.use(express.static(path.join(__dirname, "public")));
+app.use("/favicon.ico", express.static("public/images/favicon.ico"));
+
 app.use(session({
 	name: "session",
 	secret: process.env.SESSION_SECRET,
@@ -49,14 +52,10 @@ app.use(compression());
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-
 app.use(cookieParser());
 app.use(csrf());
 app.use(limiter);
 app.use(cache('5 minutes'));
-app.use(express.static(path.join(__dirname, "public")));
-app.use("/favicon.ico", express.static("public/images/favicon.ico"));
-
 app.disable('x-powered-by');
 
 app.use("/", indexRouter);
