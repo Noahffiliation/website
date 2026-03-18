@@ -4,7 +4,6 @@ const createError = require("http-errors");
 const express = require("express");
 import path from 'node:path'
 const cookieParser = require("cookie-parser");
-const csrf = require("csurf");
 const session = require("cookie-session");
 const logger = require("morgan");
 const helmet = require('helmet');
@@ -53,7 +52,6 @@ app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(csrf());
 app.use(limiter);
 app.use(cache('5 minutes'));
 app.disable('x-powered-by');
