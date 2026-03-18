@@ -18,6 +18,7 @@ const __dirname = path.dirname(__filename);
 
 const indexRouter = require("./routes/index");
 
+// deepcode ignore UseCsurfForExpress: Only GET requests are made
 const app = express();
 
 // View engine setup
