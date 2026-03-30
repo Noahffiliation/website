@@ -10,7 +10,7 @@
     "test:coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage --forceExit"
   },
   "dependencies": {
-    "@notionhq/client": "^5.15.0",
+    "@notionhq/client": "^5.16.0",
     "apicache": "^1.6.3",
     "axios": "^1.14.0",
     "compression": "^1.8.1",
