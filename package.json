@@ -7,7 +7,7 @@
     "dev": "nodemon ./bin/www",
     "lint": "eslint **/*.js --fix",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
-    "test:coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage --forceExit"
+    "test:coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage --forceExit --detectOpenHandles"
   },
   "dependencies": {
     "@notionhq/client": "^5.23.3",
@@ -36,9 +36,10 @@
   },
   "overrides": {
     "@babel/core": "^7.26.6",
+    "brace-expansion": "^5.0.8",
     "formidable": "^3.5.4",
     "glob": "^13.0.6",
-    "js-yaml": "^4.2.0",
+    "js-yaml": "^4.3.0",
     "superagent": "^10.3.0",
     "test-exclude": "^8.0.0"
   }
