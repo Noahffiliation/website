@@ -2,15 +2,13 @@ import { createRequire } from "node:module";
 const require = createRequire(import.meta.url);
 const createError = require("http-errors");
 const express = require("express");
-import path from 'node:path'
-const cookieParser = require("cookie-parser");
-const session = require("cookie-session");
+import path from 'node:path';
 const logger = require("morgan");
 const helmet = require('helmet');
 const compression = require('compression');
 const rateLimit = require('express-rate-limit');
 const apicache = require('apicache');
-let cache = apicache.middleware;
+const cache = apicache.middleware;
 
 import { fileURLToPath } from "node:url";
 const __filename = fileURLToPath(import.meta.url);
@@ -32,15 +30,6 @@ app.locals.moment = require('moment');
 app.use(express.static(path.join(__dirname, "public")));
 app.use("/favicon.ico", express.static("public/images/favicon.ico"));
 
-app.use(session({
-	name: "session",
-	secret: process.env.SESSION_SECRET,
-	cookie: {
-		secure: true,
-		httpOnly: true,
-	}
-}));
-
 const limiter = rateLimit({
 	max: 400,
 	windowMs: 60 * 1000,
@@ -52,9 +41,10 @@ app.use(compression());
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
 app.use(limiter);
-app.use(cache('5 minutes'));
+
+const onlyStatus200 = (_req, res) => res.statusCode === 200;
+app.use(cache('5 minutes', onlyStatus200));
 app.disable('x-powered-by');
 
 app.use("/", indexRouter);
@@ -65,7 +55,7 @@ app.use((_req, _res, next) => {
 });
 
 // Error handler
-app.use((err, req, res, next) => {
+app.use((err, req, res, _next) => {
 	// Set locals, only providing error in development
 	res.locals.message = err.message;
 	res.locals.error = req.app.get("env") === "development" ? err : {};

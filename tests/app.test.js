@@ -1,56 +1,46 @@
 const request = require('supertest');
-const express = require('express');
-process.env.SESSION_SECRET = 'test-secret'; // Fix for CI: Ensure secret is present before app init
-// const app = require('../app');
 let app;
 const axios = require('axios');
-const Parser = require('rss-parser');
-const { Client } = require('@notionhq/client');
-const { LastFmNode } = require('lastfm');
 
-
+const mockQuery = jest.fn();
+const mockRetrieve = jest.fn();
+const mockParseURL = jest.fn();
+const mockLastfmRequest = jest.fn();
 
 // Mock dependencies
 jest.mock('apicache', () => ({
-    middleware: jest.fn(() => (req, res, next) => next()),
+    middleware: jest.fn((duration, toggle) => (req, res, next) => {
+        if (typeof toggle === 'function') {
+            toggle(req, res);
+        }
+        return next();
+    }),
 }));
+
 jest.mock('axios');
+
 jest.mock('rss-parser', () => {
     return jest.fn().mockImplementation(() => {
-        return { parseURL: jest.fn().mockResolvedValue({ items: [] }) };
+        return { parseURL: mockParseURL };
     });
 });
+
 jest.mock('@notionhq/client', () => {
     return {
         Client: jest.fn().mockImplementation(() => {
             return {
-                databases: {
-                    query: jest.fn().mockResolvedValue({
-                        results: [{ id: '1', properties: { Name: { title: [{ plain_text: 'Game 1' }] } } }]
-                    })
-                },
-                pages: {
-                    retrieve: jest.fn().mockResolvedValue({
-                        properties: {
-                            Name: { title: [{ plain_text: 'Game 1' }] },
-                            Priority: { multi_select: [{ name: 'High' }] },
-                            Platform: { multi_select: [{ name: 'PC' }] }
-                        }
-                    })
-                }
+                databases: { query: mockQuery },
+                pages: { retrieve: mockRetrieve }
             };
         })
     };
 });
+
 jest.mock('lastfm', () => {
     return {
         LastFmNode: jest.fn().mockImplementation(() => {
             return {
-                request: jest.fn((method, params) => {
-                    if (params.handlers?.success) {
-                        params.handlers.success({ recenttracks: { track: [] } });
-                    }
-                })
+                request: mockLastfmRequest
             };
         })
     };
@@ -66,6 +56,25 @@ describe('App and Routes', () => {
         }
     });
 
+    beforeEach(() => {
+        mockQuery.mockResolvedValue({
+            results: [{ id: '1', properties: { Name: { title: [{ plain_text: 'Game 1' }] } } }]
+        });
+        mockRetrieve.mockResolvedValue({
+            properties: {
+                Name: { title: [{ plain_text: 'Game 1' }] },
+                Priority: { multi_select: [{ name: 'High' }] },
+                Platform: { multi_select: [{ name: 'PC' }] }
+            }
+        });
+        mockParseURL.mockResolvedValue({ items: [] });
+        mockLastfmRequest.mockImplementation((method, params) => {
+            if (params.handlers?.success) {
+                params.handlers.success({ recenttracks: { track: [] } });
+            }
+        });
+    });
+
     afterEach(() => {
         jest.clearAllMocks();
     });
@@ -74,17 +83,18 @@ describe('App and Routes', () => {
         it('should render the index page', async () => {
             const res = await request(app).get('/');
             expect(res.statusCode).toEqual(200);
-            expect(res.text).toContain('<!DOCTYPE html>'); // Assuming pug renders html
+            expect(res.text).toContain('<!DOCTYPE html>');
         });
     });
 
     describe('GET /stats', () => {
         it('should render stats page with data', async () => {
-            axios.get.mockResolvedValueOnce({ data: { movies: { watched: 10 }, shows: { watched: 5 } } }); // Trakt stats
-            axios.get.mockResolvedValueOnce({ data: [] }); // Trakt movies
-            axios.get.mockResolvedValueOnce({ data: [] }); // Trakt shows
-            axios.get.mockResolvedValueOnce({ data: { data: [] } }); // MAL completed
-            axios.get.mockResolvedValueOnce({ data: { data: [] } }); // MAL plan to watch
+            axios.get
+                .mockResolvedValueOnce({ data: { movies: { watched: 10 }, shows: { watched: 5 } } })
+                .mockResolvedValueOnce({ data: [] })
+                .mockResolvedValueOnce({ data: [] })
+                .mockResolvedValueOnce({ data: { data: [] } })
+                .mockResolvedValueOnce({ data: { data: [] } });
 
             const res = await request(app).get('/stats');
             expect(res.statusCode).toEqual(200);
@@ -94,10 +104,6 @@ describe('App and Routes', () => {
         it('should handle errors gracefully', async () => {
             axios.get.mockRejectedValue(new Error('API Error'));
             const res = await request(app).get('/stats');
-            // The current implementation catches error and renders stats with undefined values or keeps spinning?
-            // Looking at the code: console.error(error) and then res.render('stats', ...) is called with undefined stats.
-            // No, `const stats = await getStats();` returns undefined if error.
-            // Then `res.render` is called with stats: undefined.
             expect(res.statusCode).toEqual(500);
         });
     });
@@ -107,6 +113,12 @@ describe('App and Routes', () => {
             const res = await request(app).get('/games');
             expect(res.statusCode).toEqual(200);
         });
+
+        it('should handle notion query error', async () => {
+            mockQuery.mockRejectedValueOnce(new Error('Notion DB Error'));
+            const res = await request(app).get('/games');
+            expect(res.statusCode).toEqual(500);
+        });
     });
 
     describe('GET /game/:id', () => {
@@ -114,34 +126,48 @@ describe('App and Routes', () => {
             const res = await request(app).get('/game/123');
             expect(res.statusCode).toEqual(200);
         });
+
+        it('should handle notion page retrieve error', async () => {
+            mockRetrieve.mockRejectedValueOnce(new Error('Notion Page Error'));
+            const res = await request(app).get('/game/123');
+            expect(res.statusCode).toEqual(500);
+        });
     });
 
     describe('GET /movies', () => {
         it('should render movies page', async () => {
-            axios.mockResolvedValue({ data: [] });
+            axios.get.mockResolvedValueOnce({ data: [] });
             const res = await request(app).get('/movies');
             expect(res.statusCode).toEqual(200);
         });
 
         it('should handle errors', async () => {
-            axios.mockRejectedValue(new Error('API Error'));
+            axios.get.mockRejectedValueOnce(new Error('API Error'));
             const res = await request(app).get('/movies');
             expect(res.statusCode).toEqual(500);
-            expect(res.text).toContain('Error'); // Assuming the error view renders 'Error' locally
+            expect(res.text).toContain('Error');
         });
     });
 
     describe('GET /movie/:id', () => {
         it('should render movie detail page for valid ID', async () => {
-            axios.mockResolvedValue({ title: 'Movie 1' });
+            axios.get.mockResolvedValueOnce({ data: { title: 'Movie 1', year: 2024, tagline: 'A great movie', overview: 'Movie overview' } });
             const res = await request(app).get('/movie/123');
             expect(res.statusCode).toEqual(200);
+            expect(res.text).toContain('Movie 1');
+            expect(res.text).toContain('A great movie');
         });
 
         it('should redirect for invalid ID', async () => {
             const res = await request(app).get('/movie/abc');
             expect(res.statusCode).toEqual(302);
             expect(res.header.location).toBe('/movies');
+        });
+
+        it('should handle error when movie fetch fails', async () => {
+            axios.get.mockRejectedValueOnce(new Error('Movie fetch error'));
+            const res = await request(app).get('/movie/123');
+            expect(res.statusCode).toEqual(500);
         });
     });
 
@@ -150,21 +176,39 @@ describe('App and Routes', () => {
             const res = await request(app).get('/letterboxd');
             expect(res.statusCode).toEqual(200);
         });
+
+        it('should handle RSS parse error', async () => {
+            mockParseURL.mockRejectedValueOnce(new Error('RSS Error'));
+            const res = await request(app).get('/letterboxd');
+            expect(res.statusCode).toEqual(500);
+        });
     });
 
     describe('GET /tv', () => {
         it('should render tv page', async () => {
-            axios.mockResolvedValue({ data: [] });
+            axios.get.mockResolvedValueOnce({ data: [] });
             const res = await request(app).get('/tv');
             expect(res.statusCode).toEqual(200);
+        });
+
+        it('should handle error in tv list', async () => {
+            axios.get.mockRejectedValueOnce(new Error('TV List Error'));
+            const res = await request(app).get('/tv');
+            expect(res.statusCode).toEqual(500);
         });
     });
 
     describe('GET /tv/:id', () => {
         it('should render tv detail page for valid ID', async () => {
-            axios.mockResolvedValue({ data: { title: 'Show 1' } });
+            axios.get.mockResolvedValueOnce({ data: { title: 'Show 1', year: 2023, overview: 'Show overview' } });
             const res = await request(app).get('/tv/123');
             expect(res.statusCode).toEqual(200);
+            expect(axios.get).toHaveBeenCalledWith(
+                'https://api.trakt.tv/shows/123',
+                expect.objectContaining({
+                    params: { extended: 'full' }
+                })
+            );
         });
 
         it('should redirect for invalid ID', async () => {
@@ -172,21 +216,39 @@ describe('App and Routes', () => {
             expect(res.statusCode).toEqual(302);
             expect(res.header.location).toBe('/tv');
         });
+
+        it('should handle error in tv detail', async () => {
+            axios.get.mockRejectedValueOnce(new Error('TV detail error'));
+            const res = await request(app).get('/tv/123');
+            expect(res.statusCode).toEqual(500);
+        });
     });
 
     describe('GET /episodes', () => {
         it('should render episodes page', async () => {
-            axios.mockResolvedValue({ data: [] });
+            axios.get.mockResolvedValueOnce({ data: [] });
             const res = await request(app).get('/episodes');
             expect(res.statusCode).toEqual(200);
+        });
+
+        it('should handle error in episodes list', async () => {
+            axios.get.mockRejectedValueOnce(new Error('Episodes list error'));
+            const res = await request(app).get('/episodes');
+            expect(res.statusCode).toEqual(500);
         });
     });
 
     describe('GET /episode/:id/:season/:episode', () => {
         it('should render episode detail page for valid params', async () => {
-            axios.mockResolvedValue({ data: { title: 'Episode 1' } });
-            const res = await request(app).get('/episode/123/1/1');
+            axios.get.mockResolvedValueOnce({ data: { title: 'Episode 1', overview: 'Episode overview' } });
+            const res = await request(app).get('/episode/123/1/2');
             expect(res.statusCode).toEqual(200);
+            expect(axios.get).toHaveBeenCalledWith(
+                'https://api.trakt.tv/shows/123/seasons/1/episodes/2',
+                expect.objectContaining({
+                    params: { extended: 'full' }
+                })
+            );
         });
 
         it('should redirect for invalid params', async () => {
@@ -194,12 +256,28 @@ describe('App and Routes', () => {
             expect(res.statusCode).toEqual(302);
             expect(res.header.location).toBe('/episodes');
         });
+
+        it('should handle error in episode detail', async () => {
+            axios.get.mockRejectedValueOnce(new Error('Episode detail error'));
+            const res = await request(app).get('/episode/123/1/2');
+            expect(res.statusCode).toEqual(500);
+        });
     });
 
     describe('GET /lastfm', () => {
         it('should render lastfm page', async () => {
             const res = await request(app).get('/lastfm');
             expect(res.statusCode).toEqual(200);
+        });
+
+        it('should handle lastfm request error', async () => {
+            mockLastfmRequest.mockImplementationOnce((method, params) => {
+                if (params.handlers?.error) {
+                    params.handlers.error(new Error('LastFM API Error'));
+                }
+            });
+            const res = await request(app).get('/lastfm');
+            expect(res.statusCode).toEqual(500);
         });
     });
 
@@ -213,30 +291,19 @@ describe('App and Routes', () => {
     describe('Error Handler', () => {
         it('should render error details in development', async () => {
             app.set('env', 'development');
-            axios.mockRejectedValue(new Error('Dev Error'));
+            axios.get.mockRejectedValueOnce(new Error('Dev Error'));
             const res = await request(app).get('/movies');
             expect(res.statusCode).toEqual(500);
-            // In dev, the error message should be in the response
-            // pug error view usually renders `message` and `error.status` and `error.stack`
-            // We can check if the text contains the error message
             expect(res.text).toContain('Dev Error');
-            app.set('env', 'test'); // Reset
+            app.set('env', 'test');
         });
 
         it('should not render error details in production', async () => {
             app.set('env', 'production');
-            axios.mockRejectedValue(new Error('Prod Error'));
+            axios.get.mockRejectedValueOnce(new Error('Prod Error'));
             const res = await request(app).get('/movies');
             expect(res.statusCode).toEqual(500);
-            // In prod, error object is {}, so message might be there but stack trace won't be?
-            // "res.locals.message = err.message" -> this is always set.
-            // "res.locals.error = ... ? err : {}" -> this is what changes.
-            // The default express 'error' view prints `h1= message` and `h2= error.status` and `pre #{error.stack}`.
-            // So in prod, `error` is empty, so `error.stack` is undefined, so stack trace is hidden.
-            // We can't easily check for *absence* of stack trace without knowing what stack looks like, but we can check it doesn't contain a specific string from stack if we knew it.
-            // But we CAN check that it matches expectation.
-            // Let's just rely on the coverage report to show we hit the branch.
-            app.set('env', 'test'); // Reset
+            app.set('env', 'test');
         });
     });
 });
