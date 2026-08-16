@@ -1,0 +1,11 @@
+node_modules
+.git
+.github
+.agent
+.vscode
+.editorconfig
+coverage
+tests
+.env
+.env.local
+npm-debug.log
