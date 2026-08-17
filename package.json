@@ -5,7 +5,7 @@
   "scripts": {
     "start": "node ./bin/www",
     "dev": "nodemon ./bin/www",
-    "lint": "eslint **/*.js --fix",
+    "lint": "eslint .",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "test:coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage --forceExit --detectOpenHandles"
   },
@@ -27,6 +27,9 @@
     "rss-parser": "^3.13.0"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "eslint": "^9.39.5",
+    "globals": "^16.0.0",
     "jest": "^30.4.2",
     "supertest": "^7.2.2"
   },

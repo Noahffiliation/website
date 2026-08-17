@@ -1,4 +1,4 @@
-FROM node:24.19.0-alpine3.21 AS runner
+FROM node:24-alpine3.21 AS runner
 
 WORKDIR /app
 
