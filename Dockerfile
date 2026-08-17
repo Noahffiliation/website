@@ -8,7 +8,14 @@ ENV NODE_ENV=production
 ENV PORT=3000
 
 COPY package.json package-lock.json ./
-RUN npm ci --omit=dev --ignore-scripts
+RUN npm ci --omit=dev --ignore-scripts && \
+    rm -rf \
+      /usr/local/lib/node_modules \
+      /usr/local/bin/npm \
+      /usr/local/bin/npx \
+      /usr/local/bin/corepack \
+      /root/.npm \
+      /root/.cache
 
 COPY app.mjs ./
 COPY bin ./bin
