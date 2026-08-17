@@ -27,9 +27,9 @@
     "rss-parser": "^3.13.0"
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.5",
+    "@eslint/js": "^10.0.1",
     "eslint": "^9.39.5",
-    "globals": "^16.0.0",
+    "globals": "^17.11.0",
     "jest": "^30.4.2",
     "supertest": "^7.2.2"
   },
